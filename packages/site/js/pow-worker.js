@@ -49,7 +49,47 @@ function sha256(msg) {
 
 const enc = new TextEncoder();
 
+function leadingZeroBits(bytes) {
+  let count = 0;
+  for (let i = 0; i < bytes.length; i++) {
+    if (bytes[i] === 0) { count += 8; continue; }
+    for (let bit = 7; bit >= 0; bit--) {
+      if ((bytes[i] >> bit) & 1) return count;
+      count++;
+    }
+    break;
+  }
+  return count;
+}
+
+function bytesToHex(bytes) {
+  let hex = '';
+  for (let i = 0; i < bytes.length; i++) hex += bytes[i].toString(16).padStart(2, '0');
+  return hex;
+}
+
 self.onmessage = function(e) {
+  if (e.data.eventTemplate) {
+    // NIP-13: mine the Nostr event ID until it has `difficulty` leading zero bits.
+    // The nonce tag ["nonce", "<n>", "<difficulty>"] varies each attempt.
+    // The solved event carries the mined tags and precomputed id for the caller.
+    const { eventTemplate, difficulty } = e.data;
+    const { pubkey, kind, created_at, tags, content } = eventTemplate;
+    const baseTags = tags.filter(t => t[0] !== 'nonce');
+    for (let nonce = 0; ; nonce++) {
+      const minedTags = [...baseTags, ['nonce', String(nonce), String(difficulty)]];
+      const serialized = JSON.stringify([0, pubkey, created_at, kind, minedTags, content]);
+      const hash = sha256(enc.encode(serialized));
+      if (leadingZeroBits(hash) >= difficulty) {
+        self.postMessage({ solved: true, tags: minedTags, id: bytesToHex(hash) });
+        return;
+      }
+      if (nonce % 10000 === 0) self.postMessage({ progress: nonce });
+    }
+    return;
+  }
+
+  // Legacy mode: mine SHA-256(challenge + ':' + nonce) with leading-zero check.
   const { challenge, difficulty } = e.data;
   for (let nonce = 0; ; nonce++) {
     const hash = sha256(enc.encode(challenge + ':' + nonce));

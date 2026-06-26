@@ -12,6 +12,23 @@ import { Encrypter } from './age-encryption.bundle.js';
 
 import { RELAYS, PARTY_AGE_KEYS, DEMAND_TAG } from './relays.js';
 
+// NIP-13 proof-of-work difficulty (leading zero bits in the event id).
+const POW_DIFFICULTY = 20;
+
+// Mine a NIP-13 compliant event: keep incrementing the nonce tag until the
+// event id (SHA-256 of the canonical serialization) has POW_DIFFICULTY leading
+// zero bits. Returns a Promise that resolves with the mined tags array.
+function mineEventPoW(template) {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./pow-worker.js', import.meta.url));
+    worker.onmessage = (e) => {
+      if (e.data.solved) { worker.terminate(); resolve(e.data.tags); }
+    };
+    worker.onerror = (err) => { worker.terminate(); reject(err); };
+    worker.postMessage({ eventTemplate: template, difficulty: POW_DIFFICULTY });
+  });
+}
+
 async function broadcast(event) {
   const results = await Promise.allSettled(
     RELAYS.map(url => publishToRelay(url, event))
@@ -36,11 +53,6 @@ function publishToRelay(url, event) {
   });
 }
 
-function getCaptchaToken(form) {
-  const el = form.querySelector('[name="pow-token"]');
-  return el ? el.value : '';
-}
-
 function setStatus(form, type, text) {
   let el = form.querySelector('.status');
   if (!el) return;
@@ -54,18 +66,13 @@ function setStatus(form, type, text) {
 export async function handleJoin(form) {
   const btn = form.querySelector('[type=submit]');
   btn.disabled = true;
+  const origLabel = btn.textContent;
 
   const name = form.elements.name.value.trim();
   const location = form.elements.location.value.trim();
-  const captcha = getCaptchaToken(form);
 
   if (!name || !location) {
     setStatus(form, 'err', 'Please fill in all fields.');
-    btn.disabled = false;
-    return;
-  }
-  if (!captcha) {
-    setStatus(form, 'err', 'Proof-of-work not yet complete. Please wait a moment.');
     btn.disabled = false;
     return;
   }
@@ -78,20 +85,24 @@ export async function handleJoin(form) {
 
   try {
     // age-encrypt the payload to ALL party member keys simultaneously.
-    // Each member can independently decrypt with their own private key.
     const plaintext = new TextEncoder().encode(JSON.stringify({ name, location, ts: Date.now() }));
     const enc = new Encrypter();
     for (const key of activeKeys) await enc.addRecipient(key);
     const ciphertext = await enc.encrypt(plaintext);
-    const content = btoa(String.fromCharCode(...ciphertext)); // base64
+    const content = btoa(String.fromCharCode(...ciphertext));
 
     const sk = generateSecretKey();
-    const event = finalizeEvent({
-      kind: 1337,  // custom kind: CJP encrypted signup
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [['t', 'cjp-signup']],
-      content,
-    }, sk);
+    const pk = getPublicKey(sk);
+    const created_at = Math.floor(Date.now() / 1000);
+
+    btn.textContent = 'Mining proof of work…';
+    const minedTags = await mineEventPoW({
+      pubkey: pk, kind: 1337, created_at,
+      tags: [['t', 'cjp-signup']], content,
+    });
+
+    btn.textContent = 'Submitting…';
+    const event = finalizeEvent({ kind: 1337, created_at, tags: minedTags, content }, sk);
 
     const { ok, total } = await broadcast(event);
     if (ok > 0) {
@@ -104,6 +115,7 @@ export async function handleJoin(form) {
     setStatus(form, 'err', 'Error: ' + e.message);
   } finally {
     btn.disabled = false;
+    btn.textContent = origLabel;
   }
 }
 
@@ -111,19 +123,14 @@ export async function handleJoin(form) {
 export async function handleDemand(form) {
   const btn = form.querySelector('[type=submit]');
   btn.disabled = true;
+  const origLabel = btn.textContent;
 
   const name = form.elements.name.value.trim();
   const city = form.elements.city.value.trim();
   const country = form.elements.country.value.trim();
-  const captcha = getCaptchaToken(form);
 
   if (!name || !city || !country) {
     setStatus(form, 'err', 'Please fill in all fields.');
-    btn.disabled = false;
-    return;
-  }
-  if (!captcha) {
-    setStatus(form, 'err', 'Proof-of-work not yet complete. Please wait a moment.');
     btn.disabled = false;
     return;
   }
@@ -131,12 +138,17 @@ export async function handleDemand(form) {
   try {
     const sk = generateSecretKey();
     const pk = getPublicKey(sk);
-    const event = finalizeEvent({
-      kind: 1,
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [['t', DEMAND_TAG]],
-      content: JSON.stringify({ name, city, country }),
-    }, sk);
+    const created_at = Math.floor(Date.now() / 1000);
+    const content = JSON.stringify({ name, city, country });
+
+    btn.textContent = 'Mining proof of work…';
+    const minedTags = await mineEventPoW({
+      pubkey: pk, kind: 1, created_at,
+      tags: [['t', DEMAND_TAG]], content,
+    });
+
+    btn.textContent = 'Submitting…';
+    const event = finalizeEvent({ kind: 1, created_at, tags: minedTags, content }, sk);
 
     const { ok, total } = await broadcast(event);
     if (ok > 0) {
@@ -149,5 +161,6 @@ export async function handleDemand(form) {
     setStatus(form, 'err', 'Error: ' + e.message);
   } finally {
     btn.disabled = false;
+    btn.textContent = origLabel;
   }
 }

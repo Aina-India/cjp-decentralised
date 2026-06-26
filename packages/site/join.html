@@ -44,13 +44,6 @@
         <label for="location">State, territory, or country</label>
         <input type="text" id="location" name="location" placeholder="e.g. Maharashtra, New York, Berlin" required autocomplete="off">
       </div>
-      <div class="fg">
-        <input type="hidden" name="pow-token" id="pow-token">
-        <div class="pow-widget" id="pow-widget">
-          <div class="pow-spinner" id="pow-spinner"></div>
-          <span id="pow-text">Verifying you're human…</span>
-        </div>
-      </div>
       <button type="submit" class="btn">Join Now</button>
       <div class="status" role="alert"></div>
     </form>
@@ -66,22 +59,6 @@
   This site is <a href="mirror.html">mirrored across hundreds of nodes</a> and cannot be taken down.
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
 </footer>
-<script>
-  (function() {
-    var challenge = 'cjp:' + Date.now() + ':' + Math.random().toString(36).slice(2);
-    var worker = new Worker(new URL('./js/pow-worker.js', location.href).href);
-    worker.onmessage = function(e) {
-      if (e.data.solved) {
-        document.getElementById('pow-token').value = e.data.challenge + ':' + e.data.nonce;
-        var w = document.getElementById('pow-widget');
-        w.classList.add('done');
-        document.getElementById('pow-spinner').style.display = 'none';
-        document.getElementById('pow-text').textContent = '✓ Human verified';
-      }
-    };
-    worker.postMessage({ challenge: challenge, difficulty: 20 });
-  })();
-</script>
 <script type="module">
   import { handleJoin } from './js/forms.js';
   document.getElementById('join-form').addEventListener('submit', (e) => handleJoin(e.target));

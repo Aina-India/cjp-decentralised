@@ -29,6 +29,9 @@ jobs:
       - name: JS verify-logic tests
         run: node packages/site/test/verify-logic.test.mjs
 
+      - name: JS NIP-13 PoW tests
+        run: node packages/site/test/pow-nip13.test.mjs
+
   build:
     runs-on: ubuntu-latest
     needs: test
