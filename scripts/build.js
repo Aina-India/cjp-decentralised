@@ -81,7 +81,7 @@ function resolveBase(val, base) {
 
 // Build flat substitution context for (trans, langCode, page)
 function buildContext(trans, langCode, page) {
-  const base    = langCode === 'en' ? '' : '../';
+  const base    = langCode === 'en' ? './' : '../';
   const pageData = trans.pages[page];
   if (!pageData) {
     throw new Error('No page data for "' + page + '" in lang "' + langCode + '"');
