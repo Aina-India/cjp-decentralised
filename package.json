@@ -1,0 +1,13 @@
+{
+  "name": "cjp-decentralised",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "~1.46.0",
+    "serve": "^14.0.0"
+  }
+}
