@@ -1,7 +1,6 @@
 // Nostr form submission handler.
 // Sign-up submissions are age-encrypted to all keys listed in PARTY_AGE_KEYS.
 // Any single key holder can independently decrypt — no coordination needed.
-// TODO: Replace CDN imports with local bundles.
 import {
   generateSecretKey,
   getPublicKey,

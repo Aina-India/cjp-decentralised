@@ -1,5 +1,4 @@
 // Public Nostr relays. Spread across jurisdictions for censorship resistance.
-// TODO: Replace esm.sh import with a local bundle at /js/nostr-tools.bundle.js
 export const RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol',

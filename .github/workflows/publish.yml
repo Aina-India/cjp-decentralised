@@ -57,6 +57,18 @@ jobs:
           fi
           echo "All verify.js script tags use type=module."
 
+      - name: Assert no CDN runtime URLs in dist/ (G4 guardrail)
+        # G4: every asset loaded by the browser must be same-origin and in the
+        # integrity manifest. Any https:// URL pointing at a public CDN is a
+        # supply-chain risk and a CSP violation under script-src 'self'.
+        # Matches actual URL strings only — excludes // comments mentioning CDN names.
+        run: |
+          if grep -rEn 'https?://(cdn\.jsdelivr\.net|esm\.sh|unpkg\.com|cdnjs\.cloudflare\.com)' dist/; then
+            echo "::error::CDN runtime URL found in dist/ — bundle the dependency locally (G4)"
+            exit 1
+          fi
+          echo "G4 clear: no CDN runtime URLs in dist/."
+
       - name: Compute IPFS CID
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: |
