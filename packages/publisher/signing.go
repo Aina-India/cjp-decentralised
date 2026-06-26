@@ -23,16 +23,19 @@ func verifyThreshold(ts *TrustedSigners, l *Latest) (int, error) {
 		trustedSet[strings.ToLower(s)] = true
 	}
 
+	seen  := make(map[string]bool)
 	valid := 0
 	for _, s := range l.allSigs() {
-		if !trustedSet[strings.ToLower(s.Signer)] {
+		signerKey := strings.ToLower(s.Signer)
+		if !trustedSet[signerKey] {
 			continue
 		}
 		pk, err := hex.DecodeString(s.Signer)
 		if err != nil || len(pk) != 32 {
 			continue
 		}
-		if verifyLatest(ed25519.PublicKey(pk), l.CID, l.Version, l.Timestamp, s.Signature) {
+		if verifyLatest(ed25519.PublicKey(pk), l.CID, l.Version, l.Timestamp, s.Signature) && !seen[signerKey] {
+			seen[signerKey] = true
 			valid++
 		}
 	}

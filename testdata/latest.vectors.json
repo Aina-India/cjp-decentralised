@@ -82,6 +82,31 @@
       "expectedValidCount": 0
     },
     {
+      "name": "duplicate_signer",
+      "description": "Same signer appears twice in signatures[]; threshold 2 → reject because only 1 distinct signer verified (fixes #13).",
+      "latest": {
+        "cid": "bafybeibcjptestvector00000000000000000000000000000000000000000",
+        "version": 42,
+        "timestamp": 1700000000,
+        "signatures": [
+          {
+            "signer": "e65e1b5fa6aa4c1750ebacb94ca10b035e21ddb31244737545122c3cf8610cc6",
+            "signature": "c72f4dfb95c2b7936af46c65b9708fda7d8113d1f7d640b504d0d24a48665506c0980396fc7154cce1ce2b8595a4427be899724ea2af1153937e0c2baf131a01"
+          },
+          {
+            "signer": "e65e1b5fa6aa4c1750ebacb94ca10b035e21ddb31244737545122c3cf8610cc6",
+            "signature": "c72f4dfb95c2b7936af46c65b9708fda7d8113d1f7d640b504d0d24a48665506c0980396fc7154cce1ce2b8595a4427be899724ea2af1153937e0c2baf131a01"
+          }
+        ]
+      },
+      "trustedSigners": [
+        "e65e1b5fa6aa4c1750ebacb94ca10b035e21ddb31244737545122c3cf8610cc6"
+      ],
+      "threshold": 2,
+      "expectedValid": false,
+      "expectedValidCount": 1
+    },
+    {
       "name": "threshold_not_met",
       "description": "One valid signature but threshold is 2 → reject (validCount 1 < 2).",
       "latest": {

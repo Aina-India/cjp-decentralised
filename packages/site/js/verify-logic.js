@@ -36,15 +36,14 @@ export function collectTrustedSigs(latest, trustedSet) {
 // UX); per-signature import/verify failures are skipped, matching the original
 // verify.js behaviour.
 //
-// NOTE: this counts every valid (signer, signature) entry — collapsing to
-// DISTINCT signers is deliberately NOT done here yet. That is the PR-2 /
-// issue #13 fix (validSigners → Set of distinct signers).
 export async function verifyTrustedSigs(trustedSigs, latest) {
   const msgBytes = new TextEncoder().encode(`${latest.cid}\n${latest.version}\n${latest.timestamp}`);
   const msgHash = await crypto.subtle.digest('SHA-256', msgBytes);
 
+  const seen = new Set();
   const validSigners = [];
   for (const s of trustedSigs) {
+    if (seen.has(s.signer)) continue;
     try {
       const pubKey = await crypto.subtle.importKey(
         'raw', hexToBytes(s.signer),
@@ -55,7 +54,7 @@ export async function verifyTrustedSigs(trustedSigs, latest) {
         hexToBytes(s.signature),
         msgHash
       );
-      if (ok) validSigners.push(s.signer);
+      if (ok) { seen.add(s.signer); validSigners.push(s.signer); }
     } catch (_) { /* malformed entry, skip */ }
   }
   return validSigners;

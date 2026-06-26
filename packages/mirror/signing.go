@@ -62,6 +62,7 @@ func verifyThreshold(ts *TrustedSigners, trustedKeys []ed25519.PublicKey, l *Lat
 	}
 
 	msg   := signingMessage(l.CID, l.Version, l.Timestamp)
+	seen  := make(map[string]bool)
 	valid := 0
 	for _, s := range l.allSigs() {
 		pk, ok := keyMap[strings.ToLower(s.Signer)]
@@ -72,7 +73,9 @@ func verifyThreshold(ts *TrustedSigners, trustedKeys []ed25519.PublicKey, l *Lat
 		if err != nil || len(sigBytes) != 64 {
 			continue
 		}
-		if ed25519.Verify(pk, msg, sigBytes) {
+		signerKey := strings.ToLower(s.Signer)
+		if ed25519.Verify(pk, msg, sigBytes) && !seen[signerKey] {
+			seen[signerKey] = true
 			valid++
 		}
 	}
