@@ -183,6 +183,17 @@ import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from '.
   const fingerprints = validSigners.map(k => k.slice(0, 8) + '…' + k.slice(-4)).join(' ');
   const sigLabel = `<a class="cjp-badge__fp" href="trust.html" title="What does this fingerprint mean? How to verify.">${fingerprints}</a>`;
 
+  // ── Step 3b: staleness check ──────────────────────────────────────────────
+  // latest.timestamp is when the publisher signed this CID. If it is older
+  // than 48 h the content may be stale — show the outdated badge and stop.
+  // The daemon enforces the same threshold server-side; this is client-visible.
+  const MAX_STALE_SECONDS = 48 * 3600;
+  if (latest.timestamp && (Date.now() / 1000 - latest.timestamp) > MAX_STALE_SECONDS) {
+    const ageHours = Math.floor((Date.now() / 1000 - latest.timestamp) / 3600);
+    set('outdated', `⚠ Signed but stale — last update ${ageHours}h ago · ${gwLink} · ${sigLabel}`);
+    return;
+  }
+
   // ── Step 4: fetch integrity.json via signed CID (content-addressed) ─────
   // Try all gateways in parallel with a short timeout so a single slow gateway
   // doesn't hang the badge for 30+ seconds. Reject non-2xx inside each branch

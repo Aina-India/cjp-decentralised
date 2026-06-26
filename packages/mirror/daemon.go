@@ -242,6 +242,12 @@ func (d *Daemon) poll() {
 	}
 	log.Printf("Verified %d/%d signatures (threshold: %d)", validCount, len(d.ts.Signers), d.ts.Threshold)
 
+	if !isFreshEnough(latest, d.cfg.MaxAge) {
+		age := time.Since(time.Unix(latest.Timestamp, 0)).Round(time.Minute)
+		log.Printf("latest.json is %s old (MaxAge: %s) — refusing stale update", age, d.cfg.MaxAge)
+		return
+	}
+
 	d.stateMu.RLock()
 	prevCID := d.state.PinnedCID
 	prevVer := d.state.PinnedVer

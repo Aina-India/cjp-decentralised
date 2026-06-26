@@ -40,6 +40,11 @@ type Config struct {
 	// view of every other mirror it has ever observed via heartbeats).
 	// Same default fallback rule as PropagationFile.
 	PeersFile string
+
+	// MaxAge is the maximum age of latest.json's timestamp before the daemon
+	// refuses to pin it. Prevents indefinite replay of a validly-signed but
+	// outdated manifest. Set to 0 to disable. Default: 48h.
+	MaxAge time.Duration
 }
 
 func defaultConfig() Config {
@@ -59,6 +64,7 @@ func defaultConfig() Config {
 		MirrorRelayURL:  envOr("MIRROR_RELAY_URL", ""),
 		PropagationFile: envOr("PROPAGATION_FILE", ""),
 		PeersFile:       envOr("PEERS_FILE", ""),
+		MaxAge:          parseDuration(envOr("MAX_AGE", "48h"), 48*3600),
 	}
 }
 
