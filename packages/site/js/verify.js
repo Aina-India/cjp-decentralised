@@ -14,6 +14,8 @@
 // Signature scheme (mirrors packages/publisher/signing.go):
 //   Ed25519( SHA-256( "{cid}\n{version}\n{timestamp}" ) )
 
+import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from './verify-logic.js';
+
 (async function () {
   'use strict';
 
@@ -47,15 +49,9 @@
   const badge = document.getElementById('cjp-verify-badge');
   if (!badge) return;
 
-  function hexToBytes(hex) {
-    const a = new Uint8Array(hex.length >>> 1);
-    for (let i = 0; i < a.length; i++) a[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16);
-    return a;
-  }
-
-  function bytesToHex(buf) {
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  }
+  // hexToBytes / bytesToHex / collectTrustedSigs / verifyTrustedSigs are imported
+  // from ./verify-logic.mjs — the single source of truth also exercised by the
+  // test harness (packages/site/test/verify-logic.test.mjs).
 
   function set(state, html) {
     badge.className = 'cjp-badge cjp-badge--' + state;
@@ -150,45 +146,23 @@
   const trustedSet = HARDCODED_SIGNERS;
   const totalKeys  = trustedSet.size;
 
-  // Normalise both legacy single-sig and new multi-sig array formats.
-  const allSigs = Array.isArray(latest.signatures) && latest.signatures.length > 0
-    ? latest.signatures
-    : (latest.signer ? [{ signer: latest.signer, signature: latest.signature }] : []);
-
-  const trustedSigs = allSigs.filter(s => trustedSet.has(s.signer));
+  // Normalise legacy/multi-sig formats and filter to trusted signers.
+  const trustedSigs = collectTrustedSigs(latest, trustedSet);
   if (trustedSigs.length === 0) {
     set('invalid', '✗ No signature from a trusted signer — do not trust this mirror');
     return;
   }
 
   // ── Step 3: verify Ed25519 signatures — require ≥ threshold valid ───────
-  // All signers sign the same message: SHA-256("{cid}\n{version}\n{timestamp}")
-  let msgHash;
+  // All signers sign the same message: SHA-256("{cid}\n{version}\n{timestamp}").
+  // Showing the key fingerprint in the badge means a phishing clone cannot
+  // display the same fingerprint without holding the real private keys.
+  let validSigners;
   try {
-    const msgBytes = new TextEncoder().encode(`${latest.cid}\n${latest.version}\n${latest.timestamp}`);
-    msgHash = await crypto.subtle.digest('SHA-256', msgBytes);
+    validSigners = await verifyTrustedSigs(trustedSigs, latest);
   } catch (_) {
     set('unknown', '? Ed25519 not supported in this browser — <a href="' + PRIMARY_GATEWAY + '/' + latest.cid + '" target="_blank" rel="noopener noreferrer">verify via IPFS</a>');
     return;
-  }
-
-  // Verify all trusted signatures in one pass; collect valid signer keys.
-  // Showing the key fingerprint in the badge means a phishing clone cannot
-  // display the same fingerprint without holding the real private keys.
-  const validSigners = [];
-  for (const s of trustedSigs) {
-    try {
-      const pubKey = await crypto.subtle.importKey(
-        'raw', hexToBytes(s.signer),
-        { name: 'Ed25519' }, false, ['verify']
-      );
-      const ok = await crypto.subtle.verify(
-        { name: 'Ed25519' }, pubKey,
-        hexToBytes(s.signature),
-        msgHash
-      );
-      if (ok) validSigners.push(s.signer);
-    } catch (_) { /* malformed entry, skip */ }
   }
   const validCount = validSigners.length;
 

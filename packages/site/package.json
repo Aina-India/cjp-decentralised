@@ -2,9 +2,11 @@
   "name": "cjp-site",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "node ../../scripts/build.js",
-    "dev": "npx serve dist"
+    "dev": "npx serve dist",
+    "test": "node test/verify-logic.test.mjs"
   },
   "devDependencies": {
     "serve": "^14.0.0"
