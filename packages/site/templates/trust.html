@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{lang}}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>How to Verify This Site — Cockroach Janata Party</title>
-<meta name="description" content="How to independently verify that this is the genuine CJP website and not a state-run propaganda clone.">
-<link rel="canonical" href="https://cjp.fheya.de/trust.html">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://cjp.fheya.de/trust.html">
-<meta property="og:title" content="How to Verify This Site — Cockroach Janata Party">
-<meta property="og:description" content="How to independently verify that this is the genuine CJP website and not a state-run propaganda clone.">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+{{canonical_og_block}}
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="{{base}}css/style.css">
 </head>
 <body>
 <nav>
-  <a class="logo" href="index.html">CJP <em>Cockroach Janata Party</em></a>
+  <a class="logo" href="{{base}}index.html">CJP <em>{{party_name}}</em></a>
   <ul>
-    <li><a href="index.html">Manifesto</a></li>
-    <li><a href="join.html">Join</a></li>
-    <li><a href="demand.html">Demand</a></li>
-    <li><a href="mirror.html">Mirror</a></li>
+    <li><a href="{{base}}index.html">{{nav_manifesto}}</a></li>
+    <li><a href="{{base}}join.html">{{nav_join}}</a></li>
+    <li><a href="{{base}}demand.html">{{nav_demand}}</a></li>
+    <li><a href="{{base}}mirror.html">{{nav_mirror}}</a></li>
   </ul>
+  <div class="langs">
+    {{lang_switcher}}
+  </div>
 </nav>
 <main>
   <h1>How to Verify This Site</h1>
@@ -230,16 +229,13 @@
   </p>
 </main>
 <footer>
-  This site is <a href="mirror.html">mirrored across hundreds of nodes</a> and cannot be taken down.
+  {{footer_html}}
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
 </footer>
-<script type="module" src="js/verify.js"></script>
+<script type="module" src="{{base}}js/verify.js"></script>
 <script>
-// Manual paste UI: verifies a pasted signed latest.json against the hardcoded
-// signer keys, stores it in localStorage. verify.js picks it up on next load.
 (function () {
   'use strict';
-  // KEEP IN SYNC with verify.js HARDCODED_SIGNERS — same trust anchor.
   const HARDCODED_SIGNERS = new Set([
     'c1688ff074c50557d4aacfd668580c119dd4e425f18eb65c8cffac53a433b5c3',
   ]);
@@ -310,7 +306,6 @@
     setStatus('Override cleared', true);
   });
 
-  // Show currently-stored override if any.
   try {
     const ov = localStorage.getItem('cjp:manual-latest');
     if (ov) {
@@ -321,14 +316,6 @@
 })();
 </script>
 <script>
-// Peer attestation viewer + SVG cross-attestation graph.
-//
-// Endorsement signals (both counted toward each peer's trust score):
-//   (1) Heartbeat-based — mirror M lists peer P in M's attestation.peers
-//   (2) Attestation-of-attestation — mirror M references peer P's own
-//       attestation event ID in M's attestation.seen_attestations chain.
-//       Event IDs are content-addressed (sha256 over pubkey+kind+ts+tags+content)
-//       so the referenced event must predate the referencer cryptographically.
 (function () {
   'use strict';
   const RELAYS = [
@@ -387,7 +374,6 @@
     });
   }
 
-  // Force-directed layout. Pure JS, ~250 iterations — plenty for <50 nodes.
   function layoutGraph(nodes, edges, width, height) {
     if (nodes.length === 0) return;
     const cx = width / 2, cy = height / 2;
@@ -477,13 +463,9 @@
     return svg;
   }
 
-  // Aggregate historical attestations to produce the lifetime proof-of-
-  // participation view. Each peer's "best ever" trust score across all
-  // daily archives, plus the union of pubkeys ever named in any attestation.
   function buildLifetime(allEvents) {
-    const dailyByDate = new Map(); // dateString → array of events with d=YYYY-MM-DD
-    let attestersEverSeen = new Set();
-    const peakAttestersByPeer = new Map(); // pubkey → max attesters count
+    const dailyByDate = new Map();
+    const peakAttestersByPeer = new Map();
 
     for (const ev of allEvents) {
       const dTag = (ev.tags || []).find(t => t[0] === 'd');
@@ -494,18 +476,14 @@
       dailyByDate.get(d).push(ev);
     }
 
-    // For each day, deduplicate by attester (keep newest), compute peer→attesters map.
-    const totalAttesterSet = new Set();
-    for (const [date, events] of dailyByDate) {
+    for (const [, events] of dailyByDate) {
       const latestPerAttester = new Map();
       for (const ev of events) {
         const prev = latestPerAttester.get(ev.pubkey);
         if (!prev || ev.created_at > prev.created_at) latestPerAttester.set(ev.pubkey, ev);
       }
-      const dayPeerAttesters = new Map(); // peer pubkey → Set of attester pubkeys for this day
+      const dayPeerAttesters = new Map();
       for (const ev of latestPerAttester.values()) {
-        attestersEverSeen.add(ev.pubkey);
-        totalAttesterSet.add(ev.pubkey);
         let payload;
         try { payload = JSON.parse(ev.content); } catch { continue; }
         if (!payload) continue;
@@ -518,7 +496,6 @@
           }
         }
       }
-      // Self-attesters count as their own peer (with attesters = self).
       for (const attesterPubkey of latestPerAttester.keys()) {
         if (!dayPeerAttesters.has(attesterPubkey)) {
           dayPeerAttesters.set(attesterPubkey, new Set([attesterPubkey]));
@@ -530,14 +507,8 @@
       }
     }
 
-    // Count peers that reached ≥ 70% trust on at least one day. Trust score
-    // requires knowing the total attester count for that day, so a peer's
-    // ratio is computed per-day and we take the max.
     let credible = 0;
-    for (const [peer, peakCount] of peakAttestersByPeer) {
-      // Use the largest possible attester pool across days as denominator
-      // for the peak ratio — but actually we want per-day ratio.
-      // Compute again per day for accuracy.
+    for (const [peer] of peakAttestersByPeer) {
       let peerPeakRatio = 0;
       for (const [, events] of dailyByDate) {
         const dayAttesters = new Set();
@@ -550,7 +521,7 @@
           if (payload && Array.isArray(payload.peers) && payload.peers.some(p => p && p.pubkey === peer)) {
             count++;
           } else if (ev.pubkey === peer) {
-            count++; // self-counted
+            count++;
           }
         }
         const ratio = count / dayAttesters.size;
@@ -569,13 +540,10 @@
   async function load() {
     statusEl.textContent = 'Querying Nostr…';
     const since = Math.floor(Date.now() / 1000) - 90 * 24 * 3600;
-    // Pull both d="v1" (current state) and d="YYYY-MM-DD" archives in one query;
-    // filter splits them apart on the client.
     const filter = { kinds: [30078], '#t': ['cjp-attestation'], since, limit: 1000 };
     const allEvents = [];
     await Promise.allSettled(RELAYS.map(u => queryRelay(u, filter, allEvents)));
 
-    // Split: current-state events (d=v1) vs daily archives (d=YYYY-MM-DD).
     const events = [];
     const dailyEvents = [];
     for (const ev of allEvents) {
@@ -607,9 +575,6 @@
       ensure(ev.pubkey).hasOwnAttestation = true;
     }
 
-    // Combine both endorsement layers into peerInfo.attesters:
-    //   (1) heartbeat — listed in attestation.peers
-    //   (2) chain — referenced in attestation.seen_attestations
     for (const att of latestByAttester.values()) {
       let payload;
       try { payload = JSON.parse(att.content); } catch { continue; }
@@ -642,8 +607,6 @@
       return;
     }
 
-    // Trust score: weighted by whether each endorser is itself an
-    // established mirror (own attestation + ≥ 2 distinct endorsers).
     const isEstablished = info => info.hasOwnAttestation && info.attesters.size >= 2;
     const trustScore = info => {
       let w = 0;
@@ -703,7 +666,6 @@
     table.appendChild(tbody);
     listEl.appendChild(table);
 
-    // Build SVG graph data.
     const nodeById = new Map();
     const nodes = [];
     for (const [pubkey, info] of peers) {
@@ -743,7 +705,6 @@
       graphWrap.style.display = '';
     }
 
-    // Lifetime stats from the daily archive events.
     const lifetimePanel = document.getElementById('lifetime-panel');
     if (dailyEvents.length > 0 && lifetimePanel) {
       const stats = buildLifetime(dailyEvents);

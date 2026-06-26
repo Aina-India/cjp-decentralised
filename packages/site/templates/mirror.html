@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{lang}}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Run a Mirror — Cockroach Janata Party</title>
-<meta name="description" content="Help keep this site alive. Run a mirror node with one command.">
-<link rel="canonical" href="https://cjp.fheya.de/mirror.html">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://cjp.fheya.de/mirror.html">
-<meta property="og:title" content="Run a Mirror — Cockroach Janata Party">
-<meta property="og:description" content="Help keep this site alive. Run a mirror node with one command.">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+{{canonical_og_block}}
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="{{base}}css/style.css">
 </head>
 <body>
 <nav>
-  <a class="logo" href="index.html">CJP <em>Cockroach Janata Party</em></a>
+  <a class="logo" href="{{base}}index.html">CJP <em>{{party_name}}</em></a>
   <ul>
-    <li><a href="index.html">Manifesto</a></li>
-    <li><a href="join.html">Join</a></li>
-    <li><a href="demand.html">Demand</a></li>
-    <li><a href="mirror.html" class="active">Mirror</a></li>
+    <li><a href="{{base}}index.html">{{nav_manifesto}}</a></li>
+    <li><a href="{{base}}join.html">{{nav_join}}</a></li>
+    <li><a href="{{base}}demand.html">{{nav_demand}}</a></li>
+    <li><a href="{{base}}mirror.html" class="active">{{nav_mirror}}</a></li>
   </ul>
+  <div class="langs">
+    {{lang_switcher}}
+  </div>
 </nav>
 <main>
   <h1>Run a Mirror</h1>
@@ -130,18 +129,15 @@ COUNTRY=IN \
   </div>
 </main>
 <footer>
-  This site is mirrored across hundreds of nodes and cannot be taken down.
-  Content is stored on IPFS. The movement lives as long as one node does.
+  {{footer_html}}
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
 </footer>
 <script type="module">
-  import { loadMirrorStats } from './js/mirrors.js';
+  import { loadMirrorStats } from '{{base}}js/mirrors.js';
   const countEl = document.getElementById('mirror-count');
   const listEl = document.getElementById('mirror-list');
   loadMirrorStats(countEl, listEl);
   setInterval(() => loadMirrorStats(countEl, listEl), 30000);
-  // latest.json lives in the repo root, not in dist/, so fetch from GitHub.
-  // Abort after 5s so the CID display doesn't hang on a slow CDN/DNS path.
   (async () => {
     const target = document.getElementById('current-cid');
     const ctl = new AbortController();
@@ -172,9 +168,6 @@ COUNTRY=IN \
     }
   })();
 
-  // Populate the multi-gateway links + propagation-check button. The buttons
-  // open in new tabs (user can verify with their own eyes); the propagation
-  // check probes them in parallel and reports timing/reachability.
   function wireGateways(cid) {
     const wrap = document.getElementById('cid-gateways');
     if (!wrap) return;
@@ -184,9 +177,6 @@ COUNTRY=IN \
     document.getElementById('gw-ipfs').href = 'https://ipfs.io/ipfs/' + cid;
     document.getElementById('gw-w3s').href = 'https://w3s.link/ipfs/' + cid;
 
-    // Pull provider count from the mirror's own propagation.json, if present.
-    // This is published by the mirror daemon after each pin and represents the
-    // count of distinct peers the local DHT walk found providing the CID.
     fetch('/propagation.json', { cache: 'no-cache' })
       .then(r => r.ok ? r.json() : null)
       .then(p => {
@@ -199,11 +189,6 @@ COUNTRY=IN \
     document.getElementById('check-propagation').addEventListener('click', () => probe(cid));
   }
 
-  // Probe each gateway in parallel with a 6s timeout. Cross-origin gateways
-  // use no-cors mode, so we can't read response status — instead we time
-  // the request: a gateway that has the CID cached responds in <1s; a
-  // gateway that has to do DHT lookup takes 5-30s. Treat fast resolution
-  // as "reachable", timeout/abort as "not reachable from here".
   async function probe(cid) {
     const out = document.getElementById('propagation-results');
     out.replaceChildren();
@@ -229,8 +214,6 @@ COUNTRY=IN \
         await fetch(g.url, opts);
         const elapsed = Math.round(performance.now() - start);
         clearTimeout(timer);
-        // Fast resolution implies cache hit (gateway has the CID).
-        // Slow but successful resolution still counts as "reachable".
         return { ...g, ok: true, elapsed };
       } catch {
         clearTimeout(timer);
@@ -260,6 +243,6 @@ COUNTRY=IN \
     out.appendChild(note);
   }
 </script>
-<script type="module" src="js/verify.js"></script>
+<script type="module" src="{{base}}js/verify.js"></script>
 </body>
 </html>

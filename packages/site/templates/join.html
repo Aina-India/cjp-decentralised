@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+{{canonical_og_block}}
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="{{base}}css/style.css">
+</head>
+<body>
+<nav>
+  <a class="logo" href="{{base}}index.html">CJP <em>{{party_name}}</em></a>
+  <ul>
+    <li><a href="{{base}}index.html">{{nav_manifesto}}</a></li>
+    <li><a href="{{base}}join.html" class="active">{{nav_join}}</a></li>
+    <li><a href="{{base}}demand.html">{{nav_demand}}</a></li>
+    <li><a href="{{base}}mirror.html">{{nav_mirror}}</a></li>
+  </ul>
+  <div class="langs">
+    {{lang_switcher}}
+  </div>
+</nav>
+<main>
+  <h1>{{h1}}</h1>
+  <p class="sub">{{sub_html}}</p>
+
+  {{callout_html}}
+
+  <div class="card">
+    <form id="join-form" onsubmit="return false">
+      <div class="fg">
+        <label for="name">{{label_name}}</label>
+        <input type="text" id="name" name="name" placeholder="{{ph_name}}" required autocomplete="off">
+      </div>
+      <div class="fg">
+        <label for="location">{{label_location}}</label>
+        <input type="text" id="location" name="location" placeholder="{{ph_location}}" required autocomplete="off">
+      </div>
+      <button type="submit" class="btn">{{btn_submit}}</button>
+      <div class="status" role="alert"></div>
+    </form>
+  </div>
+
+  <p style="margin-top:1.5rem;color:var(--muted);font-size:.85rem">
+    {{note_html}}
+  </p>
+</main>
+<footer>
+  {{footer_html}}
+  <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
+</footer>
+<script type="module">
+  import { handleJoin } from '{{base}}js/forms.js';
+  document.getElementById('join-form').addEventListener('submit', (e) => handleJoin(e.target));
+</script>
+<script type="module" src="{{base}}js/verify.js"></script>
+</body>
+</html>

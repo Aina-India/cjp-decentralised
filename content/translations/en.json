@@ -1,0 +1,81 @@
+{
+  "lang": "en",
+  "party_name": "Cockroach Janata Party",
+  "nav": {
+    "manifesto": "Manifesto",
+    "join": "Join",
+    "demand": "Demand",
+    "mirror": "Mirror"
+  },
+  "pages": {
+    "index": {
+      "title": "Cockroach Janata Party — Manifesto",
+      "description": "A political front of the youth, by the youth, for the youth: Secular, Socialist, Democratic, and Lazy.",
+      "h1": "Cockroach Janata Party",
+      "sub_html": "A political front of the youth, by the youth, for the youth:<br><strong>Secular · Socialist · Democratic · Lazy</strong>",
+      "origin_h2": "Origin",
+      "origin_p1_html": "On <strong>15 May 2026</strong>, Chief Justice Surya Kant described unemployed young Indians as <em>\"cockroaches\"</em> and <em>\"parasites of society\"</em> from the bench of the Supreme Court of India.",
+      "origin_p2_html": "The next day, <strong>Abhijeet Dipke</strong> — a political communications strategist and former Aam Aadmi Party campaigner — founded the Cockroach Janata Party. We took the name. We wore it.",
+      "origin_quote_html": "\"We are not here to set up another PM CARES, holiday in Davos on the taxpayer's salary slip, or rebrand corruption as 'strategic spending.'\"",
+      "who_h2": "Who We Are",
+      "who_p1_html": "A movement with no interest in becoming a traditional political party or recruiting established politicians. We build a platform for young people who keep getting called lazy, chronically online, and — most recently — cockroaches.",
+      "who_p2_html": "Religion, caste, and gender play no role in membership. If you are young and angry and honest, you are already one of us.",
+      "manifesto_h2": "Five-Point Manifesto",
+      "point1_html": "<strong>1. Judicial Independence</strong> No Chief Justice shall receive a Rajya Sabha seat or any post-retirement government appointment as reward. Judges serve the Constitution, not the ruling coalition.",
+      "point2_html": "<strong>2. Election Integrity</strong> Deleting legitimate votes is an act of terrorism against democracy. Activists arrested under UAPA for exposing vote suppression are political prisoners, not criminals. The Chief Election Commissioner must be held personally accountable for every suppressed vote.",
+      "point3_html": "<strong>3. Women's Representation</strong> 50% of all Cabinet positions and parliamentary seats must be held by women. Tokenism is not representation.",
+      "point4_html": "<strong>4. Media Freedom</strong> Cancel the broadcast licences of Adani-owned and Reliance-owned media outlets. Investigate the financial accounts of \"Godi media\" anchors who function as government press offices.",
+      "point5_html": "<strong>5. Anti-Defection</strong> Any politician who switches party affiliation faces a mandatory 20-year ban from contesting elections. Democracy is not a revolving door.",
+      "membership_h2": "Membership Criteria",
+      "membership_intro_html": "You qualify if you are:",
+      "mc_item1": "Unemployed — by force, by choice, or by principle",
+      "mc_item2": "Lazy — physical activity only",
+      "mc_item3": "Chronically online — minimum 11 hours per day",
+      "mc_item4": "Capable of ranting with sharp, honest content",
+      "membership_note_html": "Wealth, religion, caste, gender, and formal credentials are not considered.",
+      "cta_join": "Join the Cockroach Army",
+      "cta_demand": "Demand Resignation",
+      "footer_html": "This site is <a href=\"{{base}}mirror.html\">mirrored across hundreds of nodes</a> and cannot be taken down. Content is stored on IPFS. The movement lives as long as one node does."
+    },
+    "join": {
+      "title": "Join — Cockroach Janata Party",
+      "description": "Join the Cockroach Army. No email required. No data sold.",
+      "h1": "Join the Cockroach Army",
+      "sub_html": "No email. No phone number. No data sold. Your name and location are submitted<br>as an encrypted message only the party can read. Verified human, anonymous otherwise.",
+      "callout_html": "<div class=\"callout\" style=\"background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 var(--r) var(--r) 0;padding:.9rem 1.1rem;margin-bottom:1.5rem;font-size:.9rem;line-height:1.6\">\n    We acknowledge the caste disparity problem in India. If you are not <em>Savarna</em>, you are especially encouraged to join. If you are not cis, male, upper-caste, and Hindu, you are especially encouraged to show your support.\n  </div>",
+      "label_name": "Your name",
+      "ph_name": "Full name",
+      "label_location": "State, territory, or country",
+      "ph_location": "e.g. Maharashtra, New York, Berlin",
+      "btn_submit": "Join Now",
+      "note_html": "Submissions are sent as <strong>encrypted Nostr messages</strong> to the party's public key. Only the party can decrypt them. The submission is broadcast to 12+ independent relays simultaneously — no single server can be taken down to erase your membership.",
+      "footer_html": "This site is <a href=\"{{base}}mirror.html\">mirrored across hundreds of nodes</a> and cannot be taken down."
+    },
+    "demand": {
+      "title": "Demand Resignation — Cockroach Janata Party",
+      "description": "Sign the petition demanding the immediate resignation of India's Education Minister.",
+      "h1": "Demand Resignation",
+      "sub_html": "Public petition demanding the immediate resignation of India's Education Minister.",
+      "quote_html": "We, the students, youth, and citizens of India, demand the <strong>immediate resignation of the Education Minister of India</strong>. A minister who presides over a system that crushes young people and then calls them cockroaches deserves no office.",
+      "label_name": "Your name",
+      "ph_name": "Full name",
+      "label_city": "City",
+      "ph_city": "City",
+      "label_country": "Country",
+      "ph_country": "Country",
+      "btn_submit": "Sign the Petition",
+      "note_html": "Your name, city, and country are published as a <strong>public Nostr event</strong> tagged <code>#cjp-demand</code>. This is a public petition — your signature is visible to anyone. No email address is collected. Signatures are recorded on 12+ independent relays across multiple jurisdictions.",
+      "footer_html": "This site is <a href=\"{{base}}mirror.html\">mirrored across hundreds of nodes</a> and cannot be taken down."
+    },
+    "mirror": {
+      "title": "Run a Mirror — Cockroach Janata Party",
+      "description": "Help keep this site alive. Run a mirror node with one command.",
+      "footer_html": "This site is mirrored across hundreds of nodes and cannot be taken down. Content is stored on IPFS. The movement lives as long as one node does."
+    },
+    "trust": {
+      "title": "How to Verify This Site — Cockroach Janata Party",
+      "description": "How to independently verify that this is the genuine CJP website and not a state-run propaganda clone.",
+      "footer_html": "This site is <a href=\"{{base}}mirror.html\">mirrored across hundreds of nodes</a> and cannot be taken down."
+    }
+  }
+}

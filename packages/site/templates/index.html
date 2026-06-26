@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="{{lang}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+{{canonical_og_block}}
+<meta name="twitter:card" content="summary">
+<link rel="stylesheet" href="{{base}}css/style.css">
+</head>
+<body>
+<nav>
+  <a class="logo" href="{{base}}index.html">CJP <em>{{party_name}}</em></a>
+  <ul>
+    <li><a href="{{base}}index.html" class="active">{{nav_manifesto}}</a></li>
+    <li><a href="{{base}}join.html">{{nav_join}}</a></li>
+    <li><a href="{{base}}demand.html">{{nav_demand}}</a></li>
+    <li><a href="{{base}}mirror.html">{{nav_mirror}}</a></li>
+  </ul>
+  <div class="langs">
+    {{lang_switcher}}
+  </div>
+</nav>
+<main>
+  <h1>{{h1}}</h1>
+  <p class="sub">{{sub_html}}</p>
+
+  <h2>{{origin_h2}}</h2>
+  <p>{{origin_p1_html}}</p>
+  <p>{{origin_p2_html}}</p>
+  <blockquote>{{origin_quote_html}}</blockquote>
+
+  <h2>{{who_h2}}</h2>
+  <p>{{who_p1_html}}</p>
+  <p>{{who_p2_html}}</p>
+
+  <h2>{{manifesto_h2}}</h2>
+  <ol class="manifesto-list">
+    <li>{{point1_html}}</li>
+    <li>{{point2_html}}</li>
+    <li>{{point3_html}}</li>
+    <li>{{point4_html}}</li>
+    <li>{{point5_html}}</li>
+  </ol>
+
+  <h2>{{membership_h2}}</h2>
+  <p>{{membership_intro_html}}</p>
+  <ul>
+    <li>{{mc_item1}}</li>
+    <li>{{mc_item2}}</li>
+    <li>{{mc_item3}}</li>
+    <li>{{mc_item4}}</li>
+  </ul>
+  <p>{{membership_note_html}}</p>
+
+  <div class="ctas">
+    <a class="btn" href="{{base}}join.html">{{cta_join}}</a>
+    <a class="btn" style="background:transparent;border:1px solid var(--accent);color:var(--accent)" href="{{base}}demand.html">{{cta_demand}}</a>
+  </div>
+</main>
+<footer>
+  {{footer_html}}
+  <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
+</footer>
+<script type="module" src="{{base}}js/verify.js"></script>
+</body>
+</html>
