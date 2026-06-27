@@ -5,11 +5,13 @@
     "manifesto": "Manifesto",
     "join": "Join",
     "demand": "Demand",
-    "mirror": "Mirror"
+    "mirror": "Mirror",
+    "vision": "Vision",
+    "eligibility": "Eligibility"
   },
   "pages": {
     "index": {
-      "title": "Cockroach Janata Party — Manifesto",
+      "title": "Cockroach Janata Party Official Mirror — Voice of the Lazy & Unemployed",
       "description": "A political front of the youth, by the youth, for the youth: Secular, Socialist, Democratic, and Lazy.",
       "h1": "Cockroach Janata Party",
       "sub_html": "A political front of the youth, by the youth, for the youth:<br><strong>Secular · Socialist · Democratic · Lazy</strong>",

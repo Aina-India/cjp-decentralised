@@ -10,14 +10,32 @@
 <link rel="stylesheet" href="{{base}}css/style.css" integrity="{{sri_css}}">
 </head>
 <body>
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>No servers</span><span>No owners</span><span>Vol. 1 · Edition 1</span>
+    <span>Hosted wherever the wifi works</span><span>Censorship-resistant edition</span>
+    <span>You cannot squash a movement</span>
+    <span>No servers</span><span>No owners</span><span>Vol. 1 · Edition 1</span>
+    <span>Hosted wherever the wifi works</span><span>Censorship-resistant edition</span>
+    <span>You cannot squash a movement</span>
+  </div>
+</div>
 <nav>
-  <a class="logo" href="{{base}}index.html">CJP <em>{{party_name}}</em></a>
+  <a class="brand" href="index.html" aria-label="{{party_name}}">
+    <img class="brand-logo" src="{{base}}img/pwa-icon.svg" alt="" aria-hidden="true">
+    <span class="brand-text">
+      <span class="brand-name">COCKROACH<br>JANATA PARTY</span>
+      <span class="brand-dev">कॉकरोच जनता पार्टी · <span class="brand-est">Est. 2026</span></span>
+    </span>
+  </a>
   <ul>
-    <li><a href="{{base}}index.html">{{nav_manifesto}}</a></li>
-    <li><a href="{{base}}join.html">{{nav_join}}</a></li>
-    <li><a href="{{base}}demand.html">{{nav_demand}}</a></li>
+    <li><a href="index.html#vision">{{nav_vision}}</a></li>
+    <li><a href="index.html#manifesto">{{nav_manifesto}}</a></li>
+    <li><a href="index.html#eligibility">{{nav_eligibility}}</a></li>
+    <li><a href="demand.html">{{nav_demand}}</a></li>
     <li><a href="{{base}}mirror.html">{{nav_mirror}}</a></li>
   </ul>
+  <a class="nav-join" href="join.html" data-join-open>{{nav_join}}</a>
   <div class="langs">
     {{lang_switcher}}
   </div>

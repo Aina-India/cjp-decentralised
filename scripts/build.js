@@ -99,6 +99,8 @@ function buildContext(trans, langCode, page, sriCtx) {
     base,
     party_name:         trans.party_name,
     nav_manifesto:      trans.nav.manifesto,
+    nav_vision:         trans.nav.vision,
+    nav_eligibility:    trans.nav.eligibility,
     nav_join:           trans.nav.join,
     nav_demand:         trans.nav.demand,
     nav_mirror:         trans.nav.mirror,

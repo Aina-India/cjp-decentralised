@@ -10,55 +10,133 @@
 <link rel="stylesheet" href="{{base}}css/style.css" integrity="{{sri_css}}">
 </head>
 <body>
+
+<!-- Top scrolling ticker -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>No servers</span><span>No owners</span><span>Vol. 1 · Edition 1</span>
+    <span>Hosted wherever the wifi works</span><span>Censorship-resistant edition</span>
+    <span>You cannot squash a movement</span>
+    <span>No servers</span><span>No owners</span><span>Vol. 1 · Edition 1</span>
+    <span>Hosted wherever the wifi works</span><span>Censorship-resistant edition</span>
+    <span>You cannot squash a movement</span>
+  </div>
+</div>
+
 <nav>
-  <a class="logo" href="{{base}}index.html">CJP <em>{{party_name}}</em></a>
+  <a class="brand" href="index.html" aria-label="{{party_name}}">
+    <img class="brand-logo" src="{{base}}img/pwa-icon.svg" alt="" aria-hidden="true">
+    <span class="brand-text">
+      <span class="brand-name">COCKROACH<br>JANATA PARTY</span>
+      <span class="brand-dev">कॉकरोच जनता पार्टी · <span class="brand-est">Est. 2026</span></span>
+    </span>
+  </a>
   <ul>
-    <li><a href="{{base}}index.html" class="active">{{nav_manifesto}}</a></li>
-    <li><a href="{{base}}join.html">{{nav_join}}</a></li>
-    <li><a href="{{base}}demand.html">{{nav_demand}}</a></li>
+    <li><a href="index.html#vision">{{nav_vision}}</a></li>
+    <li><a href="index.html#manifesto">{{nav_manifesto}}</a></li>
+    <li><a href="index.html#eligibility">{{nav_eligibility}}</a></li>
+    <li><a href="demand.html">{{nav_demand}}</a></li>
     <li><a href="{{base}}mirror.html">{{nav_mirror}}</a></li>
   </ul>
+  <a class="nav-join" href="join.html" data-join-open>{{nav_join}}</a>
   <div class="langs">
     {{lang_switcher}}
   </div>
 </nav>
-<main>
-  <h1>{{h1}}</h1>
-  <p class="sub">{{sub_html}}</p>
 
-  <h2>{{origin_h2}}</h2>
-  <p>{{origin_p1_html}}</p>
-  <p>{{origin_p2_html}}</p>
-  <blockquote>{{origin_quote_html}}</blockquote>
-
-  <h2>{{who_h2}}</h2>
-  <p>{{who_p1_html}}</p>
-  <p>{{who_p2_html}}</p>
-
-  <h2>{{manifesto_h2}}</h2>
-  <ol class="manifesto-list">
-    <li>{{point1_html}}</li>
-    <li>{{point2_html}}</li>
-    <li>{{point3_html}}</li>
-    <li>{{point4_html}}</li>
-    <li>{{point5_html}}</li>
-  </ol>
-
-  <h2>{{membership_h2}}</h2>
-  <p>{{membership_intro_html}}</p>
-  <ul>
-    <li>{{mc_item1}}</li>
-    <li>{{mc_item2}}</li>
-    <li>{{mc_item3}}</li>
-    <li>{{mc_item4}}</li>
-  </ul>
-  <p>{{membership_note_html}}</p>
-
-  <div class="ctas">
-    <a class="btn" href="{{base}}join.html">{{cta_join}}</a>
-    <a class="btn" style="background:transparent;border:1px solid var(--accent);color:var(--accent)" href="{{base}}demand.html">{{cta_demand}}</a>
+<!-- Hero -->
+<header class="hero">
+  <span class="cjp-watermark" aria-hidden="true">CJP</span>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <span class="hero-kicker"><span class="dot"></span> Censorship-resistant · Live</span>
+      <h1 class="hero-title">Voice of the <span class="hl-accent">Lazy</span> &amp; <span class="hl-italic">Unemployed.</span></h1>
+      <p class="hero-sub">{{sub_html}}</p>
+      <div class="hero-ctas">
+        <a class="btn btn--primary" href="join.html" data-join-open>{{cta_join}} →</a>
+        <a class="btn btn--blood" href="demand.html">{{cta_demand}} →</a>
+        <a class="btn-text" href="#manifesto">Read the Manifesto</a>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">5</div><div class="stat-label">Demands</div></div>
+        <div><div class="stat-num">0</div><div class="stat-label">Sponsors</div></div>
+        <div><div class="stat-num">0</div><div class="stat-label">Servers</div></div>
+        <div><div class="stat-num">∞</div><div class="stat-label">Mirrors</div></div>
+      </div>
+    </div>
+    <aside class="hero-poster" aria-hidden="true">
+      <div class="pp-eyebrow">Official Bulletin · No. 1</div>
+      <div class="pp-big">You cannot <em>squash</em> a movement.</div>
+      <div class="pp-foot">MIRRORED ACROSS HUNDREDS OF NODES · IPFS · NOSTR · TOR · EST. 2026</div>
+    </aside>
   </div>
+</header>
+
+<main>
+  <!-- Vision -->
+  <section class="section" id="vision">
+    <span class="eyebrow">Chapter One</span>
+    <h2 class="section-title">{{origin_h2}}</h2>
+    <p>{{origin_p1_html}}</p>
+    <p>{{origin_p2_html}}</p>
+    <blockquote>{{origin_quote_html}}</blockquote>
+    <h2 class="section-title" style="margin-top:2.5rem">{{who_h2}}</h2>
+    <p>{{who_p1_html}}</p>
+    <p>{{who_p2_html}}</p>
+  </section>
 </main>
+
+<!-- Manifesto (dark) -->
+<section class="demands section" id="manifesto">
+  <div class="demands-inner">
+    <span class="eyebrow">The Five Demands</span>
+    <h2 class="demands-title">{{manifesto_h2}}</h2>
+    <p class="demands-sub">Read it once. Read it twice. Then send it to someone who needs to read it.</p>
+    <ol class="manifesto-list">
+      <li><p>{{point1_html}}</p></li>
+      <li><p>{{point2_html}}</p></li>
+      <li><p>{{point3_html}}</p></li>
+      <li><p>{{point4_html}}</p></li>
+      <li><p>{{point5_html}}</p></li>
+    </ol>
+  </div>
+</section>
+
+<main>
+  <!-- Eligibility -->
+  <section class="section" id="eligibility">
+    <span class="eyebrow">Membership</span>
+    <h2 class="section-title">{{membership_h2}}</h2>
+    <p class="sub">{{membership_intro_html}}</p>
+    <ul class="req-list">
+      <li class="req"><span class="req-meta">REQ / 01</span><span class="req-title">{{mc_item1}}</span><span class="req-check">✓</span></li>
+      <li class="req"><span class="req-meta">REQ / 02</span><span class="req-title">{{mc_item2}}</span><span class="req-check">✓</span></li>
+      <li class="req"><span class="req-meta">REQ / 03</span><span class="req-title">{{mc_item3}}</span><span class="req-check">✓</span></li>
+      <li class="req"><span class="req-meta">REQ / 04</span><span class="req-title">{{mc_item4}}</span><span class="req-check">✓</span></li>
+    </ul>
+    <p style="margin-top:1.5rem">{{membership_note_html}}</p>
+
+    <div class="ctas">
+      <a class="btn btn--primary" href="join.html" data-join-open>{{cta_join}} →</a>
+      <a class="btn" href="demand.html">{{cta_demand}} →</a>
+    </div>
+  </section>
+</main>
+
+<!-- Bottom marquee -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>You cannot squash a movement</span>
+    <span>Together we survive</span>
+    <span>Stronger together</span>
+    <span>Unity · Resilience · Progress</span>
+    <span>You cannot squash a movement</span>
+    <span>Together we survive</span>
+    <span>Stronger together</span>
+    <span>Unity · Resilience · Progress</span>
+  </div>
+</div>
+
 <footer>
   {{footer_html}}
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
