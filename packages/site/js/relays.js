@@ -15,10 +15,9 @@ export const RELAYS = [
 ];
 
 // Party member age public keys for sign-up encryption.
-// Add one age1... key per line for each trusted party member.
-// Any single key holder can independently decrypt submissions.
-// Generate a key pair with: age-keygen
-// Add only the public key here (from stdout of age-keygen).
+// DO NOT EDIT this array directly — build.js overwrites dist/js/relays.js
+// with keys read from party-keys.txt (the canonical single source of truth).
+// To add or revoke a key: edit party-keys.txt and rebuild.
 export const PARTY_AGE_KEYS = [
   'age1emk4axrheghnuvqyasxjcaxqeap50s4rdfvrpe548a747sjvks3swav2vc',
 ];

@@ -200,6 +200,32 @@ if (fs.existsSync(DIST)) {
 // Copy CSS, JS, and other non-HTML assets first so SRI hashes can be computed.
 copyAssets(SRC, DIST);
 
+// Inject party age keys from party-keys.txt into dist/js/relays.js.
+// party-keys.txt is the single canonical source; relays.js in source has a
+// placeholder array that is overwritten here so there is exactly one place
+// to edit when adding or revoking a party member.
+(function injectPartyKeys() {
+  const keysPath = path.join(ROOT, 'party-keys.txt');
+  const raw = fs.readFileSync(keysPath, 'utf8');
+  const keys = raw.split('\n')
+    .map(function(l) { return l.trim(); })
+    .filter(function(l) { return l.length > 0 && !l.startsWith('#'); });
+  if (keys.length === 0) {
+    throw new Error('party-keys.txt contains no keys — add at least one age1… public key');
+  }
+  const relaysPath = path.join(DIST, 'js/relays.js');
+  const src = fs.readFileSync(relaysPath, 'utf8');
+  const keysLiteral = keys.map(function(k) { return "  '" + k + "'"; }).join(',\n');
+  const patched = src.replace(
+    /export const PARTY_AGE_KEYS = \[[^\]]*\];/,
+    'export const PARTY_AGE_KEYS = [\n' + keysLiteral + ',\n];'
+  );
+  if (patched === src) {
+    throw new Error('party-keys injection failed: PARTY_AGE_KEYS pattern not found in dist/js/relays.js');
+  }
+  fs.writeFileSync(relaysPath, patched);
+})();
+
 // Pre-compute SRI hashes for assets referenced directly in <script src> / <link>.
 // These are injected into every page via template placeholders so the browser
 // can verify first-party assets before executing them.

@@ -114,6 +114,8 @@ If you believe any of these choices are inadequate for the threat model, please 
 
 ## Dependency pinning
 
-The site currently loads `nostr-tools` and the `age-encryption` library from `esm.sh` (a JavaScript CDN). This is a known risk: if `esm.sh` is compromised or coerced, malicious code could be served to users. We intend to replace these with locally-bundled files and subresource integrity (SRI) hashes. Contributions toward this goal are welcome and high priority.
+`nostr-tools` and `age-encryption` are bundled locally as `packages/site/js/nostr-tools.bundle.js` and `packages/site/js/age-encryption.bundle.js` — they are **no longer loaded from any CDN at runtime**. Both bundles are content-addressed in the IPFS integrity manifest and verified by the browser badge.
 
-Until local bundling is complete, you should be aware that using the live site requires trusting `esm.sh`. Mirror operators and technically sophisticated users may prefer to fetch the source, bundle locally, and serve from a self-controlled mirror.
+First-party scripts (`verify.js`) and the stylesheet (`style.css`) carry `integrity="sha256-…"` SRI attributes injected by `build.js` at build time, so the browser refuses to execute a tampered file before the badge ever runs.
+
+**Remaining CDN dependency:** the FriendlyCaptcha anti-spam widget on translated (hi/ta/te/bn) sign-up forms is still loaded from `cdn.jsdelivr.net` (tracked as issue #15). This risk is limited to non-English form submission pages. The English form uses a client-side proof-of-work implementation with no CDN dependency. Fixing the translated forms is in progress.
