@@ -1,6 +1,7 @@
 services:
   ipfs:
-    image: ipfs/kubo:latest
+    # Pinned to digest on 2026-06-27; bump via: docker pull ipfs/kubo:latest && docker inspect --format='{{index .RepoDigests 0}}' ipfs/kubo:latest
+    image: ipfs/kubo:latest@sha256:8907cb0cc1ad5798f6bb1bb1341a800990c268e021cedfa317e8aa1a33864214
     restart: unless-stopped
     ports:
       - "4001:4001"   # swarm
@@ -20,7 +21,8 @@ services:
   # (guaranteed local success), then to public relays for federation.
   # Browsers discover this relay from heartbeats via MIRROR_RELAY_URL.
   relay:
-    image: dockurr/strfry:latest
+    # Pinned to digest on 2026-06-27; bump via: docker pull dockurr/strfry:latest && docker inspect --format='{{index .RepoDigests 0}}' dockurr/strfry:latest
+    image: dockurr/strfry:latest@sha256:545555da5dd2c2b502f2c0d159f4dc4996d0e488e3bf25905ce881722d63d2c5
     restart: unless-stopped
     volumes:
       - ./strfry.conf:/etc/strfry.conf:ro
@@ -52,7 +54,8 @@ services:
       - html_data:/var/cjp/html
 
   nginx:
-    image: nginx:alpine
+    # Pinned to digest on 2026-06-27; bump via: docker pull nginx:alpine && docker inspect --format='{{index .RepoDigests 0}}' nginx:alpine
+    image: nginx:alpine@sha256:54f2a904c251d5a34adf545a72d32515a15e08418dae0266e23be2e18c66fefa
     restart: unless-stopped
     depends_on:
       - relay
@@ -68,7 +71,8 @@ services:
   # useful for local testing or when the operator has their own reverse
   # proxy in front of this stack.
   caddy:
-    image: caddy:2-alpine
+    # Pinned to digest on 2026-06-27; bump via: docker pull caddy:2-alpine && docker inspect --format='{{index .RepoDigests 0}}' caddy:2-alpine
+    image: caddy:2-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
     restart: unless-stopped
     depends_on:
       - nginx
@@ -84,7 +88,8 @@ services:
       - caddy_config:/config
 
   tor:
-    image: dperson/torproxy:latest
+    # Pinned to digest on 2026-06-27; bump via: docker pull dperson/torproxy:latest && docker inspect --format='{{index .RepoDigests 0}}' dperson/torproxy:latest
+    image: dperson/torproxy:latest@sha256:d8b5f1cf24f1b7a0aa334929a264b2606a107223dd0d51eb1cda8aae6fbeec53
     restart: unless-stopped
     environment:
       - HIDDEN_SERVICE=nginx:80
