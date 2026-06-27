@@ -292,7 +292,8 @@ main{
 .btn-sm{padding:.5rem 1.1rem;font-size:.72rem}
 
 /* hero stats */
-.hero-stats{display:flex;flex-wrap:wrap;gap:2.5rem;border-top:2px solid var(--ink-3);padding-top:1.4rem}
+.hero-stats{display:flex;flex-wrap:wrap;gap:1.1rem 1.6rem;border-top:2px solid var(--ink-3);padding-top:1.4rem}
+.hero-stats>div{flex:0 0 auto}
 .stat-num{font-family:var(--display);font-size:clamp(2rem,3.4vw,2.7rem);line-height:1;color:var(--ink)}
 .stat-label{font-family:var(--mono);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-top:.45rem}
 
