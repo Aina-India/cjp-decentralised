@@ -79,15 +79,22 @@ function resolveBase(val, base) {
   return val.replace(/\{\{base\}\}/g, base);
 }
 
+// SHA-256 of a file as a base64 SRI token ("sha256-<base64>").
+function sriHash(filePath) {
+  return 'sha256-' + crypto.createHash('sha256')
+    .update(fs.readFileSync(filePath)).digest('base64');
+}
+
 // Build flat substitution context for (trans, langCode, page)
-function buildContext(trans, langCode, page) {
+// sriCtx must be pre-computed (assets must already be copied to dist/).
+function buildContext(trans, langCode, page, sriCtx) {
   const base    = langCode === 'en' ? './' : '../';
   const pageData = trans.pages[page];
   if (!pageData) {
     throw new Error('No page data for "' + page + '" in lang "' + langCode + '"');
   }
 
-  const ctx = {
+  const ctx = Object.assign({
     lang:               trans.lang,
     base,
     party_name:         trans.party_name,
@@ -97,7 +104,7 @@ function buildContext(trans, langCode, page) {
     nav_mirror:         trans.nav.mirror,
     lang_switcher:      buildLangSwitcher(langCode, page),
     canonical_og_block: buildCanonicalOgBlock(langCode, page, trans),
-  };
+  }, sriCtx);
 
   // Expose all page-level keys directly, resolving {{base}} within values
   for (const k of Object.keys(pageData)) {
@@ -146,13 +153,18 @@ function copyAssets(src, dst) {
   }
 }
 
+// Strip-script regex — must stay identical to the one in verify.js so that
+// CDN-injected scripts don't break the integrity check (G4 / strip-before-hash).
+const STRIP_SCRIPT_RE = /<script\b[^>]*>[\s\S]*?<\/script>/gi;
+
 // Walk dist/, SHA-256 hash every .html/.js/.css file.
-// Strip <script> tags from HTML before hashing — mirrors verify.js behaviour so
-// that CDN-injected scripts don't break the integrity check.
+// Sorts entries alphabetically so integrity.json is deterministic across runs.
 function buildIntegrity(dir, base) {
   base = base || dir;
   const out = {};
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+    .sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+  for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       Object.assign(out, buildIntegrity(full, base));
@@ -161,7 +173,7 @@ function buildIntegrity(dir, base) {
       let content = fs.readFileSync(full);
       if (entry.name.endsWith('.html')) {
         content = Buffer.from(
-          content.toString('utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ''),
+          content.toString('utf8').replace(STRIP_SCRIPT_RE, ''),
           'utf8'
         );
       }
@@ -185,8 +197,16 @@ if (fs.existsSync(DIST)) {
   fs.mkdirSync(DIST, { recursive: true });
 }
 
-// Copy CSS, JS, and other non-HTML assets
+// Copy CSS, JS, and other non-HTML assets first so SRI hashes can be computed.
 copyAssets(SRC, DIST);
+
+// Pre-compute SRI hashes for assets referenced directly in <script src> / <link>.
+// These are injected into every page via template placeholders so the browser
+// can verify first-party assets before executing them.
+const sriCtx = {
+  sri_css:       sriHash(path.join(DIST, 'css/style.css')),
+  sri_verify_js: sriHash(path.join(DIST, 'js/verify.js')),
+};
 
 // Render template × language matrix
 let pagesRendered = 0;
@@ -198,7 +218,7 @@ for (const lang of LANGS) {
 
   for (const page of lang.pages) {
     const tmpl = fs.readFileSync(path.join(TEMPLATES, page + '.html'), 'utf8');
-    const ctx  = buildContext(trans, lang.code, page);
+    const ctx  = buildContext(trans, lang.code, page, sriCtx);
     const html = render(tmpl, ctx);
     fs.writeFileSync(path.join(outDir, page + '.html'), html);
     pagesRendered++;
@@ -208,11 +228,13 @@ for (const lang of LANGS) {
 const summary = LANGS.map(function (l) { return l.code + ':' + l.pages.length; }).join(' ');
 console.log('Rendered ' + pagesRendered + ' pages (' + summary + ')');
 
-// Generate integrity.json
+// Generate integrity.json — no timestamp so the output is deterministic
+// across builds (two consecutive builds from the same source must be identical).
+// Entries are sorted alphabetically by buildIntegrity() for the same reason.
 const files = buildIntegrity(DIST);
 fs.writeFileSync(
   path.join(DIST, 'integrity.json'),
-  JSON.stringify({ generated: new Date().toISOString(), files }, null, 2)
+  JSON.stringify({ files }, null, 2)
 );
 console.log('integrity.json: ' + Object.keys(files).length + ' files hashed');
 console.log('Built → ' + DIST);

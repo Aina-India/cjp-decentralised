@@ -32,6 +32,9 @@ jobs:
       - name: JS NIP-13 PoW tests
         run: node packages/site/test/pow-nip13.test.mjs
 
+      - name: Build determinism test
+        run: node packages/site/test/build-determinism.test.mjs
+
   build:
     runs-on: ubuntu-latest
     needs: test

@@ -7,7 +7,7 @@
 <meta name="description" content="{{description}}">
 {{canonical_og_block}}
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="{{base}}css/style.css">
+<link rel="stylesheet" href="{{base}}css/style.css" integrity="{{sri_css}}">
 </head>
 <body>
 <nav>
@@ -63,6 +63,6 @@
   {{footer_html}}
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
 </footer>
-<script type="module" src="{{base}}js/verify.js"></script>
+<script type="module" src="{{base}}js/verify.js" integrity="{{sri_verify_js}}" crossorigin="anonymous"></script>
 </body>
 </html>

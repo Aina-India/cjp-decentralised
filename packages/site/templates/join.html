@@ -7,7 +7,7 @@
 <meta name="description" content="{{description}}">
 {{canonical_og_block}}
 <meta name="twitter:card" content="summary">
-<link rel="stylesheet" href="{{base}}css/style.css">
+<link rel="stylesheet" href="{{base}}css/style.css" integrity="{{sri_css}}">
 </head>
 <body>
 <nav>
@@ -55,6 +55,6 @@
   import { handleJoin } from '{{base}}js/forms.js';
   document.getElementById('join-form').addEventListener('submit', (e) => handleJoin(e.target));
 </script>
-<script type="module" src="{{base}}js/verify.js"></script>
+<script type="module" src="{{base}}js/verify.js" integrity="{{sri_verify_js}}" crossorigin="anonymous"></script>
 </body>
 </html>
