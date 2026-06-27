@@ -13,6 +13,14 @@
 //
 // Signature scheme (mirrors packages/publisher/signing.go):
 //   Ed25519( SHA-256( "{cid}\n{version}\n{timestamp}" ) )
+//
+// Badge states (fail-closed — green only on a positive content hash match):
+//   pending  — verifying in progress
+//   verified — signatures valid AND page hash matches integrity manifest ✓
+//   signed   — signatures valid but content hash unverified (amber) ⊘
+//   outdated — signatures valid but latest.json is >48 h old ⚠
+//   invalid  — signature check failed or hash mismatch ✗
+//   unknown  — no update source reachable ?
 
 import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from './verify-logic.js';
 
@@ -50,7 +58,7 @@ import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from '.
   if (!badge) return;
 
   // hexToBytes / bytesToHex / collectTrustedSigs / verifyTrustedSigs are imported
-  // from ./verify-logic.mjs — the single source of truth also exercised by the
+  // from ./verify-logic.js — the single source of truth also exercised by the
   // test harness (packages/site/test/verify-logic.test.mjs).
 
   function set(state, html) {
@@ -101,6 +109,92 @@ import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from '.
     return best;
   }
 
+  // Fetch integrity.json from IPFS gateways. Returns null if all fail/timeout.
+  async function fetchIntegrity(cid) {
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 8000);
+      const res = await Promise.any(
+        GATEWAYS.map(gw =>
+          fetch(`${gw}/${cid}/integrity.json`, {
+            cache: 'no-cache',
+            signal: ctl.signal,
+          }).then(r => r.ok ? r : Promise.reject(new Error('non-2xx')))
+        )
+      );
+      clearTimeout(timer);
+      ctl.abort();
+      return await res.json();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ── Steps 4+5: fetch integrity manifest and compare page hash ────────────
+  // `retried` prevents an infinite retry loop — we allow at most one deferred
+  // re-attempt for the IPFS-propagating case.
+  async function verifyContentHash(latest, gwLink, sigLabel, retried) {
+    // ── Step 4: fetch integrity.json via signed CID (content-addressed) ─────
+    // Try all gateways in parallel with a short timeout so a single slow gateway
+    // doesn't hang the badge for 30+ seconds.
+    const integrity = await fetchIntegrity(latest.cid);
+
+    if (!integrity) {
+      // Signatures are valid but we cannot reach the content manifest yet —
+      // IPFS propagation often takes 10–30s after publication.
+      // Show amber and schedule one retry; do NOT show green (fail-closed).
+      set('signed',
+        `⊘ Signed · content unverified · ${gwLink} · v${latest.version} · ${sigLabel}` +
+        ` · <small>IPFS propagating…</small>`);
+      if (!retried) {
+        setTimeout(() => verifyContentHash(latest, gwLink, sigLabel, true), 20000);
+      }
+      return;
+    }
+
+    // ── Step 5: hash this page and compare to the integrity manifest ─────────
+    const pagePath = location.pathname === '/' ? 'index.html'
+                   : location.pathname.replace(/^\//, '');
+
+    const expectedHash = integrity.files && integrity.files[pagePath];
+    if (!expectedHash) {
+      // Page exists but is absent from the manifest (e.g. a newly added page
+      // not yet in a published CID). Signatures are valid; content unverified.
+      set('signed',
+        `⊘ Signed · content unverified · ${gwLink} · v${latest.version} · ${sigLabel}` +
+        ` · <small>page not in manifest</small>`);
+      return;
+    }
+
+    let actualHash;
+    try {
+      const resp = await fetch(location.pathname + location.search, { cache: 'no-cache' });
+      const text = await resp.text();
+      // Strip <script> tags before hashing — CDN providers (e.g. Cloudflare) inject
+      // scripts into HTML responses without modifying the signed content. We verify
+      // the document body, not the delivery wrapper.
+      const stripped = text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+      actualHash = bytesToHex(
+        await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stripped))
+      );
+    } catch (_) {
+      // Page re-fetch blocked (strict CSP, offline, etc.). Signatures are valid
+      // but we cannot confirm content integrity — show amber, not green.
+      set('signed',
+        `⊘ Signed · content unverified · ${gwLink} · v${latest.version} · ${sigLabel}` +
+        ` · <small>page re-fetch blocked</small>`);
+      return;
+    }
+
+    if (actualHash === expectedHash) {
+      set('verified', `✓ Signed · ${gwLink} · v${latest.version} · ${sigLabel}`);
+    } else {
+      set('invalid',
+        `✗ Page content does not match signed CID — this mirror may be serving modified content. ` +
+        `Compare against ${gwLink}`);
+    }
+  }
+
   set('pending', '<span class="cjp-badge__spin"></span>Verifying…');
 
   // ── Step 1: fetch latest.json — manual override > GitHub > Nostr ─────────
@@ -137,14 +231,13 @@ import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from '.
   }
 
   if (!latest) {
-    set('unknown', '? No update source reachable — paste the signed manifest at <a href="trust.html#manual-update">trust.html</a>');
+    set('unknown', '? No update source reachable — paste the signed manifest at <a href="/trust.html#manual-update">trust.html</a>');
     return;
   }
 
   // ── Step 2: collect signatures; filter to hardcoded trusted keys ─────────
   const threshold  = HARDCODED_THRESHOLD;
   const trustedSet = HARDCODED_SIGNERS;
-  const totalKeys  = trustedSet.size;
 
   // Normalise legacy/multi-sig formats and filter to trusted signers.
   const trustedSigs = collectTrustedSigs(latest, trustedSet);
@@ -181,7 +274,9 @@ import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from '.
   // (flyers, Nostr, trusted contacts).  A clone using different keys will show
   // different fingerprints, exposing the fake.
   const fingerprints = validSigners.map(k => k.slice(0, 8) + '…' + k.slice(-4)).join(' ');
-  const sigLabel = `<a class="cjp-badge__fp" href="trust.html" title="What does this fingerprint mean? How to verify.">${fingerprints}</a>`;
+  // Root-relative href so the link works from translated subdirectory pages
+  // (e.g. /hi/index.html → /trust.html, not /hi/trust.html which doesn't exist).
+  const sigLabel = `<a class="cjp-badge__fp" href="/trust.html" title="What does this fingerprint mean? How to verify.">${fingerprints}</a>`;
 
   // ── Step 3b: staleness check ──────────────────────────────────────────────
   // latest.timestamp is when the publisher signed this CID. If it is older
@@ -194,62 +289,6 @@ import { hexToBytes, bytesToHex, collectTrustedSigs, verifyTrustedSigs } from '.
     return;
   }
 
-  // ── Step 4: fetch integrity.json via signed CID (content-addressed) ─────
-  // Try all gateways in parallel with a short timeout so a single slow gateway
-  // doesn't hang the badge for 30+ seconds. Reject non-2xx inside each branch
-  // so Promise.any only resolves on a real success — a fast 404 from one
-  // gateway doesn't poison the race.
-  let integrity = null;
-  try {
-    const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 8000);
-    const res = await Promise.any(
-      GATEWAYS.map(gw =>
-        fetch(`${gw}/${latest.cid}/integrity.json`, {
-          cache: 'no-cache',
-          signal: ctl.signal,
-        }).then(r => r.ok ? r : Promise.reject(new Error('non-2xx')))
-      )
-    );
-    clearTimeout(timer);
-    ctl.abort(); // cancel any in-flight gateways now that we have a winner
-    integrity = await res.json();
-  } catch (_) { /* all gateways failed or timed out */ }
-
-  if (!integrity) {
-    set('verified', `✓ Signed · ${gwLink} · v${latest.version} · ${sigLabel} · <small>IPFS propagating…</small>`);
-    return;
-  }
-
-  // ── Step 5: hash this page and compare to the integrity manifest ─────────
-  const pagePath = location.pathname === '/' ? 'index.html'
-                 : location.pathname.replace(/^\//, '');
-
-  const expectedHash = integrity.files && integrity.files[pagePath];
-  if (!expectedHash) {
-    set('verified', `✓ Signed · ${gwLink} · v${latest.version} · ${sigLabel} · <small>page not in manifest</small>`);
-    return;
-  }
-
-  let actualHash;
-  try {
-    const resp = await fetch(location.pathname + location.search, { cache: 'no-cache' });
-    const text = await resp.text();
-    // Strip <script> tags before hashing — CDN providers (e.g. Cloudflare) inject
-    // scripts into HTML responses without modifying the signed content. We verify
-    // the document body, not the delivery wrapper.
-    const stripped = text.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
-    actualHash = bytesToHex(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stripped)));
-  } catch (_) {
-    set('verified', `✓ Signed · ${gwLink} · v${latest.version} · ${sigLabel} · <small>page re-fetch blocked</small>`);
-    return;
-  }
-
-  if (actualHash === expectedHash) {
-    set('verified', `✓ Signed · ${gwLink} · v${latest.version} · ${sigLabel}`);
-  } else {
-    set('invalid',
-      `✗ Page content does not match signed CID — this mirror may be serving modified content. ` +
-      `Compare against ${gwLink}`);
-  }
+  // ── Steps 4+5: fetch integrity manifest and verify page content hash ─────
+  await verifyContentHash(latest, gwLink, sigLabel, false);
 })();

@@ -352,6 +352,7 @@ footer a:hover{color:var(--text)}
 .cjp-badge__fp{font-family:monospace;font-size:.85em;opacity:.8;cursor:help;border-bottom:1px dotted currentColor}
 .cjp-badge--pending {color:var(--muted);border-color:var(--border)}
 .cjp-badge--verified{color:#7ddb7d;border-color:#2d6a2d;background:#0d1f0d}
+.cjp-badge--signed  {color:#e8a020;border-color:#6b4510;background:#1a1000}
 .cjp-badge--outdated{color:#f0c040;border-color:#7a6010;background:#1a1500}
 .cjp-badge--invalid {color:#e05555;border-color:#7a1515;background:#1f0d0d}
 .cjp-badge--unknown {color:var(--muted);border-color:var(--border);background:var(--bg3)}
