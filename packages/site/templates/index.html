@@ -11,14 +11,26 @@
 </head>
 <body>
 
-<!-- Top scrolling ticker -->
+<!-- Top scrolling ticker (decorative, English) -->
 <div class="ticker" aria-hidden="true">
   <div class="ticker-track">
-    <span>No servers</span><span>No owners</span><span>Vol. 1 · Edition 1</span>
-    <span>Hosted wherever the wifi works</span><span>Censorship-resistant edition</span>
+    <span>Filed under: General Disgruntlement</span>
+    <span>Sponsored by no one. Funded by nothing.</span>
+    <span>HQ: Wherever the wifi works</span>
+    <span>No servers. No owners.</span>
+    <span>Now accepting rants, retweets, and resentment</span>
+    <span>Mirrored across hundreds of nodes</span>
+    <span>Party Launch · Volume 1, Edition 1</span>
+    <span>Censorship-resistant edition</span>
     <span>You cannot squash a movement</span>
-    <span>No servers</span><span>No owners</span><span>Vol. 1 · Edition 1</span>
-    <span>Hosted wherever the wifi works</span><span>Censorship-resistant edition</span>
+    <span>Filed under: General Disgruntlement</span>
+    <span>Sponsored by no one. Funded by nothing.</span>
+    <span>HQ: Wherever the wifi works</span>
+    <span>No servers. No owners.</span>
+    <span>Now accepting rants, retweets, and resentment</span>
+    <span>Mirrored across hundreds of nodes</span>
+    <span>Party Launch · Volume 1, Edition 1</span>
+    <span>Censorship-resistant edition</span>
     <span>You cannot squash a movement</span>
   </div>
 </div>
@@ -28,7 +40,8 @@
     <img class="brand-logo" src="{{base}}img/pwa-icon.svg" alt="" aria-hidden="true">
     <span class="brand-text">
       <span class="brand-name">COCKROACH<br>JANATA PARTY</span>
-      <span class="brand-dev">कॉकरोच जनता पार्टी · <span class="brand-est">Est. 2026</span></span>
+      <span class="brand-dev">कॉकरोच जनता पार्टी</span>
+      <span class="brand-est">Est. 2026</span>
     </span>
   </a>
   <ul>
@@ -50,39 +63,64 @@
   <div class="hero-inner">
     <div class="hero-left">
       <span class="hero-kicker"><span class="dot"></span> Censorship-resistant · Live</span>
-      <h1 class="hero-title">Voice of the <span class="hl-accent">Lazy</span> &amp; <span class="hl-italic">Unemployed.</span></h1>
+      <h1 class="hero-title">Voice of<br>the<br><span class="hl-accent">Lazy</span> &amp;<br><span class="hl-italic">Unemployed.</span></h1>
       <p class="hero-sub">{{sub_html}}</p>
       <div class="hero-ctas">
         <a class="btn btn--primary" href="join.html" data-join-open>{{cta_join}} →</a>
         <a class="btn btn--blood" href="demand.html">{{cta_demand}} →</a>
-        <a class="btn-text" href="#manifesto">Read the Manifesto</a>
+        <a class="btn-text" href="#manifesto">{{read_manifesto}}</a>
       </div>
       <div class="hero-stats">
-        <div><div class="stat-num">5</div><div class="stat-label">Demands</div></div>
-        <div><div class="stat-num">0</div><div class="stat-label">Sponsors</div></div>
-        <div><div class="stat-num">0</div><div class="stat-label">Servers</div></div>
-        <div><div class="stat-num">∞</div><div class="stat-label">Mirrors</div></div>
+        <div><div class="stat-num">5</div><div class="stat-label">{{stat_demands}}</div></div>
+        <div><div class="stat-num">0</div><div class="stat-label">{{stat_donors}}</div></div>
+        <div><div class="stat-num">1M+</div><div class="stat-label">{{stat_members}}</div></div>
+        <div><div class="stat-num">0</div><div class="stat-label">{{stat_servers}}</div></div>
+        <div><div class="stat-num">∞</div><div class="stat-label">{{stat_mirrors}}</div></div>
       </div>
     </div>
-    <aside class="hero-poster" aria-hidden="true">
-      <div class="pp-eyebrow">Official Bulletin · No. 1</div>
-      <div class="pp-big">You cannot <em>squash</em> a movement.</div>
-      <div class="pp-foot">MIRRORED ACROSS HUNDREDS OF NODES · IPFS · NOSTR · TOR · EST. 2026</div>
+    <aside class="hero-poster" aria-label="Chalo Dilli protest poster">
+      <div class="pp-top">Chalo Dilli · 20 June 2026</div>
+      <img class="pp-img" src="{{base}}img/chalo-dilli-poster-v2.jpg" alt="Chalo Dilli — 20 June 2026, Jantar Mantar, 1 PM" loading="lazy">
+      <div class="pp-bottom">
+        <div class="pp-tag">#ChaloDelhI · 20 June · Jantar Mantar</div>
+        <div class="pp-quote">“7 cities spoke.<br>Now Delhi listens.”</div>
+      </div>
     </aside>
   </div>
 </header>
 
+<!-- Marquee — right after the hero/stats (decorative, English) -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span>You Cannot Squash A Movement</span>
+    <span>Together We Survive</span>
+    <span>Stronger Together</span>
+    <span>Unity · Resilience · Progress</span>
+    <span>You Cannot Squash A Movement</span>
+    <span>Together We Survive</span>
+    <span>Stronger Together</span>
+    <span>Unity · Resilience · Progress</span>
+  </div>
+</div>
+
 <main>
   <!-- Vision -->
   <section class="section" id="vision">
-    <span class="eyebrow">Chapter One</span>
-    <h2 class="section-title">{{origin_h2}}</h2>
-    <p>{{origin_p1_html}}</p>
-    <p>{{origin_p2_html}}</p>
-    <blockquote>{{origin_quote_html}}</blockquote>
-    <h2 class="section-title" style="margin-top:2.5rem">{{who_h2}}</h2>
-    <p>{{who_p1_html}}</p>
-    <p>{{who_p2_html}}</p>
+    <div class="split">
+      <div>
+        <span class="eyebrow">Chapter One</span>
+        <h2 class="section-title">Our Movement's <span class="hl-italic">Vision.</span></h2>
+        <p>{{vision_lead}}</p>
+        <div class="callout">
+          <span class="tag-mini">Our Mission</span>
+          <p style="margin:0">{{mission_text}}</p>
+        </div>
+      </div>
+      <figure class="vision-art">
+        <img src="{{base}}img/img-2.webp" alt="CJP official artwork" loading="lazy">
+        <figcaption><span>CJP Official Artwork</span><span>Est. 2026</span></figcaption>
+      </figure>
+    </div>
   </section>
 </main>
 
@@ -90,8 +128,8 @@
 <section class="demands section" id="manifesto">
   <div class="demands-inner">
     <span class="eyebrow">The Five Demands</span>
-    <h2 class="demands-title">{{manifesto_h2}}</h2>
-    <p class="demands-sub">Read it once. Read it twice. Then send it to someone who needs to read it.</p>
+    <h2 class="demands-title">The Manifesto.</h2>
+    <p class="demands-sub">{{manifesto_sub}}</p>
     <ol class="manifesto-list">
       <li><p>{{point1_html}}</p></li>
       <li><p>{{point2_html}}</p></li>
@@ -105,42 +143,63 @@
 <main>
   <!-- Eligibility -->
   <section class="section" id="eligibility">
-    <span class="eyebrow">Membership</span>
-    <h2 class="section-title">{{membership_h2}}</h2>
-    <p class="sub">{{membership_intro_html}}</p>
+    <div class="section-head">
+      <span class="eyebrow">Membership</span>
+      <h2 class="section-title">Are you eligible<br>to <span class="hl-italic">join?</span></h2>
+      <p class="sub">{{elig_sub}}</p>
+    </div>
     <ul class="req-list">
-      <li class="req"><span class="req-meta">REQ / 01</span><span class="req-title">{{mc_item1}}</span><span class="req-check">✓</span></li>
-      <li class="req"><span class="req-meta">REQ / 02</span><span class="req-title">{{mc_item2}}</span><span class="req-check">✓</span></li>
-      <li class="req"><span class="req-meta">REQ / 03</span><span class="req-title">{{mc_item3}}</span><span class="req-check">✓</span></li>
-      <li class="req"><span class="req-meta">REQ / 04</span><span class="req-title">{{mc_item4}}</span><span class="req-check">✓</span></li>
+      <li class="req">
+        <span class="req-meta">REQ / 01</span>
+        <div class="req-body"><div class="req-title">{{req1_title}}</div><div class="req-desc">{{req1_desc}}</div></div>
+        <span class="req-check">✓</span>
+      </li>
+      <li class="req">
+        <span class="req-meta">REQ / 02</span>
+        <div class="req-body"><div class="req-title">{{req2_title}}</div><div class="req-desc">{{req2_desc}}</div></div>
+        <span class="req-check">✓</span>
+      </li>
+      <li class="req">
+        <span class="req-meta">REQ / 03</span>
+        <div class="req-body"><div class="req-title">{{req3_title}}</div><div class="req-desc">{{req3_desc}}</div></div>
+        <span class="req-check">✓</span>
+      </li>
+      <li class="req">
+        <span class="req-meta">REQ / 04</span>
+        <div class="req-body"><div class="req-title">{{req4_title}}</div><div class="req-desc">{{req4_desc}}</div></div>
+        <span class="req-check">✓</span>
+      </li>
     </ul>
-    <p style="margin-top:1.5rem">{{membership_note_html}}</p>
-
-    <div class="ctas">
-      <a class="btn btn--primary" href="join.html" data-join-open>{{cta_join}} →</a>
-      <a class="btn" href="demand.html">{{cta_demand}} →</a>
+    <div class="elig-cta">
+      <a class="btn btn--primary" href="join.html" data-join-open>{{elig_cta}} →</a>
+      <p class="elig-note">{{elig_note}}</p>
     </div>
   </section>
 </main>
-
-<!-- Bottom marquee -->
-<div class="marquee" aria-hidden="true">
-  <div class="marquee-track">
-    <span>You cannot squash a movement</span>
-    <span>Together we survive</span>
-    <span>Stronger together</span>
-    <span>Unity · Resilience · Progress</span>
-    <span>You cannot squash a movement</span>
-    <span>Together we survive</span>
-    <span>Stronger together</span>
-    <span>Unity · Resilience · Progress</span>
-  </div>
-</div>
 
 <footer>
   {{footer_html}}
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
 </footer>
+<script>
+  // Graceful in-page scrolling for nav anchors that target this page's sections.
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href*="#"]');
+    if (!a) return;
+    var href = a.getAttribute('href');
+    var i = href.indexOf('#');
+    if (i < 0) return;
+    var path = href.slice(0, i), id = href.slice(i + 1);
+    var here = path === '' || (path === 'index.html' &&
+      (location.pathname === '/' || /\/index\.html$/.test(location.pathname)));
+    if (!here || !id) return;
+    var el = document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    history.replaceState(null, '', '#' + id);
+  });
+</script>
 <script type="module" src="{{base}}js/verify.js" integrity="{{sri_verify_js}}" crossorigin="anonymous"></script>
 </body>
 </html>
