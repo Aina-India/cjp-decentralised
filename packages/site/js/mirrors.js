@@ -14,8 +14,9 @@
 import { RELAYS, MIRROR_TAG } from './relays.js';
 
 // Heartbeat window: mirrors that haven't sent a heartbeat within this many
-// seconds are not counted. Mirror daemons beat every 60s ±10s.
-const HEARTBEAT_WINDOW_S = 300;
+// seconds are not counted. Mirror daemons beat every 60s ±10s; 1 hour gives
+// up to ~60 missed beats before a mirror is dropped from the "last hour" list.
+const HEARTBEAT_WINDOW_S = 3600;
 
 // Minimum NIP-13 committed difficulty for a mirror to be counted as
 // "authenticated". At 12 bits the expected cost per heartbeat is ~4096

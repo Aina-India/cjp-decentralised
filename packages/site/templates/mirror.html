@@ -137,7 +137,7 @@ COUNTRY=IN \
   const countEl = document.getElementById('mirror-count');
   const listEl = document.getElementById('mirror-list');
   loadMirrorStats(countEl, listEl);
-  setInterval(() => loadMirrorStats(countEl, listEl), 30000);
+  setInterval(() => loadMirrorStats(countEl, listEl), 60000);
   (async () => {
     const target = document.getElementById('current-cid');
     const ctl = new AbortController();
