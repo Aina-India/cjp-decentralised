@@ -182,19 +182,18 @@
   <br><span id="cjp-verify-badge" class="cjp-badge cjp-badge--pending"></span>
 </footer>
 <script>
-  // Graceful in-page scrolling for nav anchors that target this page's sections.
+  // Graceful in-page scrolling. Intercept an anchor click only when the target
+  // section actually exists on THIS page — that keeps you on the current page
+  // (and therefore the current language) instead of following a relative href
+  // that some servers resolve against the wrong directory.
   document.addEventListener('click', function (e) {
     var a = e.target.closest('a[href*="#"]');
     if (!a) return;
     var href = a.getAttribute('href');
-    var i = href.indexOf('#');
-    if (i < 0) return;
-    var path = href.slice(0, i), id = href.slice(i + 1);
-    var here = path === '' || (path === 'index.html' &&
-      (location.pathname === '/' || /\/index\.html$/.test(location.pathname)));
-    if (!here || !id) return;
+    var id = href.slice(href.indexOf('#') + 1);
+    if (!id) return;
     var el = document.getElementById(id);
-    if (!el) return;
+    if (!el) return; // section not on this page — let the link navigate normally
     e.preventDefault();
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     history.replaceState(null, '', '#' + id);

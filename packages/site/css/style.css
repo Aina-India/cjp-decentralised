@@ -232,7 +232,7 @@ main{
 .cjp-watermark{
   position:absolute;right:-1%;bottom:-14%;z-index:0;pointer-events:none;
   font-family:var(--display);font-size:32vw;line-height:.8;color:var(--ink);opacity:.055;
-  letter-spacing:-.052em;
+  letter-spacing:-.018em;
 }
 .hero-kicker{
   display:inline-flex;align-items:center;gap:.6rem;
@@ -271,14 +271,14 @@ main{
   transition:transform .14s,box-shadow .14s,background .14s,color .14s;
 }
 .btn:hover{text-decoration:none;transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--saffron-deep)}
-.btn:active{transform:translate(5px,5px);box-shadow:none;background:var(--ink-2)}
+.btn:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--saffron-deep);background:var(--ink-2);transition-duration:.03s}
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
 .btn--primary{background:var(--saffron-deep);color:var(--paper);border-color:var(--ink);box-shadow:5px 5px 0 var(--ink)}
 .btn--primary:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink);background:#cc5018}
-.btn--primary:active{transform:translate(5px,5px);box-shadow:none;background:#8f3810}
+.btn--primary:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink);background:#8f3810;transition-duration:.03s}
 .btn--blood{background:#871919;color:var(--paper);border-color:var(--ink);box-shadow:5px 5px 0 var(--ink)}
 .btn--blood:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink);background:#9d1f1f}
-.btn--blood:active{transform:translate(5px,5px);box-shadow:none;background:#6b1414}
+.btn--blood:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink);background:#6b1414;transition-duration:.03s}
 .btn-text{
   font-family:var(--condensed);font-weight:600;text-transform:uppercase;letter-spacing:.16em;
   font-size:.82rem;color:var(--ink);border-bottom:2px solid var(--ink);padding-bottom:2px;
