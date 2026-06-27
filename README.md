@@ -159,14 +159,20 @@ docker-compose.yml    One-command volunteer mirror stack
 
 ## Publish an update (developers)
 
-1. Push to `main` — CI builds the site and uploads to IPFS, printing the new CID.
-2. Locally:
+1. Push to `main` — CI builds the site and **computes the CID** (using `ipfs add --only-hash`, no upload). The CID appears in the job summary.
+2. Locally: sign the CID with your key and publish `latest.json`:
    ```bash
-   publisher sign --key ~/.cjp/signing.key --cid <new-cid> --version <n> --note "your note"
+   publisher sign --key ~/.cjp/signing.key --cid <cid-from-ci> --version <n> --note "your note"
    publisher publish --latest latest.json
    git add latest.json README.md && git commit -m "chore: publish v<n>"
    git push
    ```
+3. Pin the CID so it is reachable on IPFS (CI does **not** do this):
+   ```bash
+   ipfs pin add <cid-from-ci>                 # on your own kubo node, or
+   # curl -X POST "https://api.pinata.cloud/pinning/pinByHash" ...  # Pinata
+   ```
+   Every volunteer mirror will also auto-pin it within `POLL_INTERVAL` seconds once `latest.json` is updated.
 
 > When publishing, update the IPFS CID in the [Verify any mirror](#verify-any-mirror) section of this README so readers always have the current address.
 
