@@ -10,3 +10,7 @@ packages/mirror/mirror
 packages/mirror/mirror-*
 packages/publisher/publisher
 packages/publisher/publisher-*
+# Pre-built binaries must never be committed — build from source instead
+bin/
+# Tampered site snapshot used for local testing only
+dist-tampered/
