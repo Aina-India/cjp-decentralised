@@ -5,11 +5,23 @@
 // This module bootstraps from the small RELAYS list, then merges every
 // discovered relay_url into the query pool for the next refresh. Result:
 // the relay set grows with volunteer count, no central registry needed.
+//
+// Trust model (PR-9 / #19): heartbeat events are Sybil-floodable because
+// creating a Nostr keypair is free. MIRROR_MIN_POW requires the event ID
+// (NIP-13) to have ≥ N leading zero bits, making Sybil inflation costly.
+// The daemon mines this PoW when HEARTBEAT_POW_DIFFICULTY > 0. The browser
+// shows a separate "authenticated" count for mirrors that pass the check.
 import { RELAYS, MIRROR_TAG } from './relays.js';
 
 // Heartbeat window: mirrors that haven't sent a heartbeat within this many
 // seconds are not counted. Mirror daemons beat every 60s ±10s.
 const HEARTBEAT_WINDOW_S = 300;
+
+// Minimum NIP-13 committed difficulty for a mirror to be counted as
+// "authenticated". At 12 bits the expected cost per heartbeat is ~4096
+// SHA-256 hashes (~0.1 ms on modern hardware, ~1 ms on a Raspberry Pi) —
+// negligible for honest mirrors, expensive for Sybil flooding at scale.
+const MIRROR_MIN_POW = 12;
 
 // Whitelist of CID character class — base32 + base58. Anything else is dropped.
 const CID_PATTERN = /^[A-Za-z0-9]{20,80}$/;
@@ -50,6 +62,30 @@ function el(tag, attrs, text) {
   return e;
 }
 
+// Returns the NIP-13 committed difficulty of a Nostr event.
+// The event must carry a nonce tag ["nonce", "<n>", "<target>"] AND its
+// id must actually satisfy that target (i.e. committed ≤ actual leading bits).
+// Returns 0 if no valid nonce tag is present or the commitment is not met.
+function committedPoWBits(ev) {
+  if (!ev || typeof ev.id !== 'string' || ev.id.length !== 64) return 0;
+  const tags = Array.isArray(ev.tags) ? ev.tags : [];
+  const nonce = tags.find(t => Array.isArray(t) && t[0] === 'nonce' && t.length >= 3);
+  if (!nonce) return 0;
+  const target = parseInt(nonce[2], 10);
+  if (!Number.isFinite(target) || target <= 0) return 0;
+  // Count leading zero bits in the hex event id.
+  let bits = 0;
+  for (let i = 0; i < ev.id.length; i += 2) {
+    const byte = parseInt(ev.id.slice(i, i + 2), 16);
+    if (byte === 0) { bits += 8; continue; }
+    for (let b = 7; b >= 0; b--) { if ((byte >> b) & 1) break; bits++; }
+    break;
+  }
+  // Committed difficulty = min(target, actual) per NIP-13.
+  // We check committed >= MIRROR_MIN_POW so a fake target can't inflate the count.
+  return Math.min(target, bits);
+}
+
 export async function loadMirrorStats(countEl, listEl) {
   const since = Math.floor(Date.now() / 1000) - HEARTBEAT_WINDOW_S;
   const filter = { kinds: [1], '#t': [MIRROR_TAG], since, limit: 200 };
@@ -72,8 +108,21 @@ export async function loadMirrorStats(countEl, listEl) {
     } catch {}
   }
 
+  // Separate authenticated mirrors (NIP-13 PoW >= MIRROR_MIN_POW) from the total.
+  let authenticatedCount = 0;
+  for (const [, ev] of seen) {
+    if (committedPoWBits(ev) >= MIRROR_MIN_POW) authenticatedCount++;
+  }
+
   if (countEl) {
     countEl.textContent = seen.size;
+    // Append authenticated sub-count when at least one mirror proves work.
+    if (authenticatedCount > 0) {
+      const sub = document.createElement('small');
+      sub.style.cssText = 'display:block;font-size:.6em;color:var(--muted);margin-top:.2rem';
+      sub.textContent = authenticatedCount + ' authenticated (NIP-13 PoW)';
+      countEl.appendChild(sub);
+    }
   }
 
   if (!listEl) return;
@@ -97,9 +146,15 @@ export async function loadMirrorStats(countEl, listEl) {
     try { data = JSON.parse(ev.content); } catch { continue; }
     if (!data || typeof data !== 'object') continue;
 
+    const authenticated = committedPoWBits(ev) >= MIRROR_MIN_POW;
     const div = el('div', { class: 'stat-box' });
 
     const peerCode = el('code', null, peer.slice(0, 16) + '…');
+    if (authenticated) {
+      const badge = el('span', { title: 'NIP-13 proof-of-work verified ≥ ' + MIRROR_MIN_POW + ' bits',
+        style: 'margin-left:.4rem;color:#4caf50;font-size:.75em' }, '✓');
+      peerCode.appendChild(badge);
+    }
     div.appendChild(peerCode);
     div.appendChild(el('br'));
 

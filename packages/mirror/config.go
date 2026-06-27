@@ -45,6 +45,12 @@ type Config struct {
 	// refuses to pin it. Prevents indefinite replay of a validly-signed but
 	// outdated manifest. Set to 0 to disable. Default: 48h.
 	MaxAge time.Duration
+
+	// HeartbeatPoWDifficulty is the minimum NIP-13 leading zero bits to mine
+	// into each heartbeat Nostr event before publishing. 0 = disabled.
+	// The browser counts only mirrors whose heartbeat meets MIRROR_MIN_POW
+	// as "authenticated", making Sybil inflation computationally expensive.
+	HeartbeatPoWDifficulty int
 }
 
 func defaultConfig() Config {
@@ -64,7 +70,8 @@ func defaultConfig() Config {
 		MirrorRelayURL:  envOr("MIRROR_RELAY_URL", ""),
 		PropagationFile: envOr("PROPAGATION_FILE", ""),
 		PeersFile:       envOr("PEERS_FILE", ""),
-		MaxAge:          parseDuration(envOr("MAX_AGE", "48h"), 48*3600),
+		MaxAge:                 parseDuration(envOr("MAX_AGE", "48h"), 48*3600),
+		HeartbeatPoWDifficulty: parseInt(envOr("HEARTBEAT_POW_DIFFICULTY", "0")),
 	}
 }
 
@@ -84,6 +91,11 @@ func envOr(key, def string) string {
 		return v
 	}
 	return def
+}
+
+func parseInt(s string) int {
+	n, _ := strconv.Atoi(s)
+	return n
 }
 
 // parseDuration accepts either Go duration form ("15m", "30s") or a bare

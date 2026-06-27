@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/nbd-wtf/go-nostr"
+	"github.com/nbd-wtf/go-nostr/nip13"
 )
 
 // heartbeatRelays is intentionally mixed: CF-fronted and self-hosted/community
@@ -117,15 +119,17 @@ func nostrTimePtr(t time.Time) *nostr.Timestamp {
 }
 
 // broadcastHeartbeat publishes a signed Nostr event announcing this mirror is alive.
-//   url      — optional public clearweb URL of this mirror (e.g. https://mirror.example)
-//   relayURL — optional public wss:// URL of this mirror's bundled relay. When set,
-//              browsers discover it from the heartbeat and add it to their query
-//              pool, so federation grows organically with volunteer count.
+//   url        — optional public clearweb URL of this mirror (e.g. https://mirror.example)
+//   relayURL   — optional public wss:// URL of this mirror's bundled relay. When set,
+//                browsers discover it from the heartbeat and add it to their query
+//                pool, so federation grows organically with volunteer count.
+//   powDifficulty — NIP-13 leading-zero bits to mine before publishing (0 = disabled).
+//                Browsers count only mirrors with sufficient PoW as "authenticated".
 //
 // Uses a RelayPool so the connection to each relay survives across heartbeats.
 // Without this, every 30-60s tick re-did a full TLS+WSS handshake and CF's
 // abuse detection rate-limited the daemon after a few hours.
-func broadcastHeartbeat(pool *RelayPool, nostrSK, peerID, cid, country, url, relayURL string, version int64) error {
+func broadcastHeartbeat(pool *RelayPool, nostrSK, peerID, cid, country, url, relayURL string, version int64, powDifficulty int) error {
 	fields := map[string]interface{}{
 		"peer_id": peerID,
 		"cid":     cid,
@@ -144,12 +148,33 @@ func broadcastHeartbeat(pool *RelayPool, nostrSK, peerID, cid, country, url, rel
 		return err
 	}
 
+	pubkey, err := nostr.GetPublicKey(nostrSK)
+	if err != nil {
+		return fmt.Errorf("derive pubkey: %w", err)
+	}
 	ev := nostr.Event{
 		Kind:      1,
+		PubKey:    pubkey,
 		Tags:      nostr.Tags{{"t", "cjp-mirrors"}},
 		Content:   string(payload),
 		CreatedAt: nostr.Timestamp(time.Now().Unix()),
 	}
+
+	// Mine NIP-13 proof-of-work when difficulty > 0. The nonce tag is included
+	// in the event so browsers can verify the committed difficulty without
+	// recomputing the hash. This makes Sybil flooding computationally expensive:
+	// at difficulty=12 each heartbeat costs ~4096 SHA-256 hashes on average.
+	if powDifficulty > 0 {
+		ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		nonceTag, mineErr := nip13.DoWork(ctx, ev, powDifficulty)
+		if mineErr != nil {
+			log.Printf("heartbeat: PoW mining failed (difficulty=%d): %v — sending without PoW", powDifficulty, mineErr)
+		} else {
+			ev.Tags = append(ev.Tags, nonceTag)
+		}
+	}
+
 	if err := ev.Sign(nostrSK); err != nil {
 		return fmt.Errorf("sign heartbeat: %w", err)
 	}
